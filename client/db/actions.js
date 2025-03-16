@@ -1,89 +1,28 @@
-import { database } from "./dbConfig";
-import { auth } from "./dbConfig";
+import { connectToDatabase } from "./dbConfig";
 
-import {
-  addDoc,
-  doc,
-  setDoc,
-  documentId,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  collection,
-  query,
-  where,
-} from "firebase/firestore";
+import User from "./schema/user.schema";
+import Chat from "./schema/chat.schema";
 
 export const db = {
-  getAuth: () => auth,
-  getDatabase: () => database,
-  database: database,
-  auth: auth,
-
-  addUser: async (user) => {
+  addUser: async (data) => {
     try {
-      const docRef = doc(database, "users", user.uid);
-      const collectionRef = collection(database, "users");
-
-      await addDoc(collectionRef, user);
+      await connectToDatabase();
+      const result = await User.create(data);
+      // new User({...}) + save = create
+      return result;
     } catch (error) {
       throw error;
     }
   },
 
-  addUserWithUID: async (user) => {
+  sendChat: async (data) => {
     try {
-      let { uid, ...userData } = user;
-
-      if (typeof uid === "number") {
-        uid = uid.toString();
-      }
-
-      const docRef = doc(database, "users", uid);
-
-      await setDoc(docRef, userData);
+      await connectToDatabase();
+      const result = await Chat.create(data);
+      // new User({...}) + save = create
+      return result;
     } catch (error) {
       throw error;
     }
   },
-
-  getUser: async (uid) => {
-    try {
-      if (typeof uid === "number") {
-        uid = uid.toString();
-      }
-
-      const docRef = doc(database, "users", uid);
-      const docSnap = await getDoc(docRef);
-      return docSnap.data();
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getusers: async () => {
-    try {
-      const collectionRef = collection(database, "users");
-      const querySnapshot = await getDocs(collectionRef);
-      const users = [];
-      querySnapshot.forEach((doc) => {
-        users.push(doc.data());
-      });
-      return users;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  addDataToCollection: async (collectionName, data) => {
-    try {
-      const collectionRef = collection(database, collectionName);
-      await addDoc(collectionRef, data);
-    } catch (error) {
-      throw error;
-    }
-  },
-
-
 };
