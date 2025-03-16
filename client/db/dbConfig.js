@@ -3,14 +3,16 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
+import "dotenv/config";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBmj1ck2KrufXeUrW3ZFJN5WPa_5PhSzKI",
-  authDomain: "saved-e754c.firebaseapp.com",
-  projectId: "saved-e754c",
-  storageBucket: "saved-e754c.firebasestorage.app",
-  messagingSenderId: "859358466902",
-  appId: "1:859358466902:web:ccaa0ac029e18cff92fcf7",
-  measurementId: "G-3GSC5JC5GY",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
 let app;

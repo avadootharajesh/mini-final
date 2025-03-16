@@ -34,7 +34,11 @@ export const db = {
 
   addUserWithUID: async (user) => {
     try {
-      const { uid, ...userData } = user;
+      let { uid, ...userData } = user;
+
+      if (typeof uid === "number") {
+        uid = uid.toString();
+      }
 
       const docRef = doc(database, "users", uid);
 
@@ -71,4 +75,15 @@ export const db = {
       throw error;
     }
   },
+
+  addDataToCollection: async (collectionName, data) => {
+    try {
+      const collectionRef = collection(database, collectionName);
+      await addDoc(collectionRef, data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+
 };
