@@ -1,7 +1,9 @@
 import React from "react";
 
+import SellerDashboard from "./sellerDashboard";
+
 const page = () => {
-  return <div>Welcome to the dashboard</div>;
+  return <SellerDashboard />;
 };
 
 export default page;
