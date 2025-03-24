@@ -3,8 +3,8 @@ import { registerUser } from "@/app/api/auth/actions";
 
 export async function POST(req) {
   try {
-    const { name, email, password } = await req.json();
-    const result = await registerUser({ name, email, password });
+    const { name, email, password, userType } = await req.json();
+    const result = await registerUser({ name, email, password, userType });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
