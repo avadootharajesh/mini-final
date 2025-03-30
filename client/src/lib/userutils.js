@@ -5,7 +5,7 @@
 import Cookies from "js-cookie"; // for client-side cookie management
 import { redirect } from "next/navigation";
 
-export async function getUser() {
+export function getUser() {
   const token = Cookies.get("token");
   const user = Cookies.get("user");
 
