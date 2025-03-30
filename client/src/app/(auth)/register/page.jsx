@@ -1,8 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
+import { registerAction } from "../../../../actions/registerActions";
 
 const RegisterPage = () => {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -19,13 +24,43 @@ const RegisterPage = () => {
     setUser((prevUser) => ({ ...prevUser, userType: type }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(user);
+    setError("");
+    setLoading(true);
+
+    if (user.password !== user.confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { confirmPassword, ...userData } = user;
+
+      const result = await registerAction(userData);
+
+      if (!result.success) {
+        setError(result.error || "Registration failed. Please try again.");
+      } else {
+        console.log("Registration successful");
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again later.");
+      console.error("Registration failed", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderForm = () => (
     <form onSubmit={handleSubmit}>
+      {error && (
+        <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -40,6 +75,7 @@ const RegisterPage = () => {
           onChange={handleInputChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-800"
           placeholder="Enter your name"
+          required
         />
       </div>
       <div className="mb-4">
@@ -56,6 +92,7 @@ const RegisterPage = () => {
           onChange={handleInputChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-800"
           placeholder="Enter your email"
+          required
         />
       </div>
       <div className="mb-4">
@@ -72,6 +109,7 @@ const RegisterPage = () => {
           onChange={handleInputChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-800"
           placeholder="Enter your password"
+          required
         />
       </div>
       <div className="mb-4">
@@ -88,12 +126,14 @@ const RegisterPage = () => {
           onChange={handleInputChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-800"
           placeholder="Confirm your password"
+          required
         />
       </div>
       <button
         type="submit"
-        className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300">
-        Register as {user.userType}
+        disabled={loading}
+        className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed">
+        {loading ? "Registering..." : `Register as ${user.userType}`}
       </button>
     </form>
   );
