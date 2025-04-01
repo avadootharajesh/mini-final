@@ -13,6 +13,8 @@ import { cookies } from "next/headers";
 const JWT_USER_SECRET = process.env.JWT_USER_SECRET;
 const JWT_SELLER_SECRET = process.env.JWT_SELLER_SECRET;
 
+connectToDatabase;
+
 const loginValidationSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
@@ -35,8 +37,6 @@ export async function loginAction(formData) {
     }
 
     const { email, password, userType } = parsedData.data;
-
-    await connectToDatabase();
 
     const Member = userType === "user" ? User : Seller;
     const user = await Member.findOne({ email });
@@ -91,8 +91,6 @@ export async function getAuthenticatedUser() {
     if (!userToken && !sellerToken) {
       return null;
     }
-
-    await connectToDatabase();
 
     if (userToken) {
       try {
