@@ -1,8 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Charmonman:wght@400;700&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Dancing+Script:wght@400..700&family=Festive&family=Fuzzy+Bubbles:wght@400;700&family=Kaushan+Script&family=Londrina+Shadow&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Satisfy&display=swap");
+
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
+
+body {
+  font-family: "Poppins", Helvetica, sans-serif;
+}
+.titlefont {
+  font-family: "Kaushan Script", Helvetica, sans-serif;
+}
+
+.text-primary {
+  color: #352c21;
+}
+.text-secondary {
+  color: #ecdebc;
+}
+.text-ternary {
+  color: #464936;
+}
+.text-accent {
+  color: #bf8b41;
+}
+
+.bg-primary {
+  background-color: #352c21;
+}
+.bg-secondary {
+  background-color: #ecdebc;
+}
+.bg-ternary {
+  background-color: #464936;
+}
+.bg-accent {
+  background-color: #bf8b41;
+}
+
+.border-accent {
+  border-color: #bf8b41;
+}
 
 @theme inline {
   --color-background: var(--background);
