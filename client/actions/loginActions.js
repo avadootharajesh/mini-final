@@ -103,6 +103,7 @@ export async function getAuthenticatedUser() {
             name: user.name,
             email: user.email,
             userType: "user",
+            token: userToken,
           };
         }
       } catch (error) {
@@ -121,6 +122,7 @@ export async function getAuthenticatedUser() {
             name: seller.name,
             email: seller.email,
             userType: "seller",
+            token: sellerToken,
           };
         }
       } catch (error) {
