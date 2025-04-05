@@ -2,23 +2,15 @@ import User from "@/../db/schema/user.schema";
 import Comment from "@/../db/schema/comment.schema";
 import CommunityPost from "@/../db/schema/communitypost.schema";
 import { connectToDatabase } from "@/../db/dbConfig";
-import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { getUserByToken } from "@/../actions/userActions";
 
 connectToDatabase();
 
 // Create a new comment
 export async function POST(request) {
   try {
-    const { postId, commentText } = await request.json();
-    const token = request.headers.get("authorization")?.split("Bearer ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "Authentication token is required" },
-        { status: 401 }
-      );
-    }
+    const { postId, commentText, token } = await request.json();
 
     if (!postId) {
       return NextResponse.json(
@@ -27,32 +19,26 @@ export async function POST(request) {
       );
     }
 
-    if (
-      !commentText ||
-      typeof commentText !== "string" ||
-      commentText.trim() === ""
-    ) {
+    if (!commentText || commentText === "") {
       return NextResponse.json(
         { success: false, error: "Comment text is required" },
         { status: 400 }
       );
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_USER_SECRET);
-    if (!decoded || !decoded.id) {
+    if (!token) {
       return NextResponse.json(
-        { success: false, error: "Invalid authentication token" },
+        { success: false, error: "Token is required" },
         { status: 401 }
       );
     }
-
-    const user = await User.findById(decoded.id);
-    if (!user) {
+    const response = await getUserByToken(token, "user");
+    if (!response.success) {
       return NextResponse.json(
         { success: false, error: "User not found" },
         { status: 404 }
       );
     }
+    const user = response.user;
 
     const post = await CommunityPost.findById(postId);
     if (!post) {
@@ -61,35 +47,23 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-
-    // Create a new comment document instead of adding to post
     const newComment = new Comment({
-      comment: commentText.trim(),
+      comment: commentText,
       user: user._id,
       post: postId,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    // Save the comment
     await newComment.save();
 
-    // Update the comment count on the post
     post.commentCount += 1;
     await post.save();
 
     return NextResponse.json({
       success: true,
       message: "Comment posted successfully!",
-      comment: {
-        _id: newComment._id,
-        comment: newComment.comment,
-        user: {
-          _id: user._id,
-          username: user.username,
-        },
-        createdAt: newComment.createdAt,
-      },
+      comment: newComment,
     });
   } catch (err) {
     console.error("Error in createComment:", err);
@@ -113,11 +87,11 @@ export async function GET(request) {
       );
     }
 
-    // Find all comments for this post and populate user data
     const comments = await Comment.find({ post: postId })
       .populate("user", "name email")
-      .sort({ createdAt: -1 });
-
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log(comments);
     return NextResponse.json({
       success: true,
       comments,

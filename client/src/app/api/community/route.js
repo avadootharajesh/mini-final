@@ -4,47 +4,25 @@ import CommunityPost from "@/../db/schema/communitypost.schema";
 import { connectToDatabase } from "@/../db/dbConfig";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { getUserByToken } from "@/../actions/userActions";
 
 connectToDatabase();
 
 // GET all communities
 export async function GET(request) {
   try {
-    // Extract communityId from URL query params if present
     const { searchParams } = new URL(request.url);
     const communityId = searchParams.get("communityId");
 
-    // If communityId is provided, get posts for that community
     if (communityId) {
       return await getPosts(communityId);
     }
 
-    // Otherwise get all communities
-    const communities = await Community.find()
-      .populate("admin", "username")
-      .lean();
-
-    const formattedCommunities = communities.map((community) => ({
-      ...community,
-      _id: community._id?.toString() || "",
-      admin: community.admin
-        ? {
-            _id: community.admin._id?.toString() || "",
-            username: community.admin.username || "Unknown",
-          }
-        : null,
-
-      posts: Array.isArray(community.posts)
-        ? community.posts.map((post) => ({
-            ...post,
-            _id: post._id?.toString() || "",
-          }))
-        : [],
-    }));
+    const communities = await Community.find().populate("admin", "name").lean();
 
     return NextResponse.json({
       success: true,
-      communities: formattedCommunities,
+      communities,
     });
   } catch (err) {
     console.error("Error in GET communities:", err);
@@ -59,61 +37,88 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { communityData } = body;
-    const token = request.headers.get("authorization")?.split("Bearer ")[1];
+    const { communityData, token } = body;
+
+    if (!communityData) {
+      return NextResponse.json(
+        { success: false, error: "Community data is required" },
+        { status: 400 }
+      );
+    }
+
+    const requiredFields = ["name", "description"];
+    for (const field of requiredFields) {
+      if (!communityData[field]) {
+        return NextResponse.json(
+          { success: false, error: `${field} is required` },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!token) {
       return NextResponse.json(
-        { success: false, error: "Authentication token is required" },
+        { success: false, error: "Token is required" },
         { status: 401 }
       );
     }
 
-    // If the request is to create a community post
-    if (body.type === "post") {
-      return await createPost(request);
+    let user;
+    try {
+      const userResult = await getUserByToken(token, "user");
+      if (!userResult || !userResult.success) {
+        return NextResponse.json(
+          { success: false, error: "Invalid or expired token" },
+          { status: 401 }
+        );
+      }
+      user = userResult.user;
+    } catch (authError) {
+      console.error("Auth error:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication failed" },
+        { status: 401 }
+      );
     }
 
-    // If the request is to add a comment
-    if (body.type === "comment") {
-      return await createComment(request);
-    }
-
-    // Continue with creating a new community
-    const decoded = jwt.verify(token, process.env.JWT_USER_SECRET);
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
+    if (!user || !user._id) {
       return NextResponse.json(
         { success: false, error: "User not found" },
         { status: 404 }
       );
     }
 
-    const community = new Community({
-      ...communityData,
-      admin: user._id,
-      posts: [], // Initialize with empty posts array
-    });
+    let community;
+    try {
+      community = new Community({
+        ...communityData,
+        admin: user._id,
+        posts: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
-    await community.save();
+      await community.save();
+    } catch (dbError) {
+      console.error("Database error:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to save community" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: "Community created successfully!",
-      community: {
-        ...community.toObject(),
-        _id: community._id.toString(),
-        admin: {
-          _id: user._id.toString(),
-          username: user.username,
-        },
-      },
+      community,
     });
   } catch (err) {
-    console.error("Error in POST community:", err);
+    console.error("Error in POST community:", {
+      error: err.message,
+      stack: err.stack,
+    });
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -135,11 +140,11 @@ async function getPosts(communityId) {
       .populate([
         {
           path: "author",
-          select: "username _id",
+          select: "name _id",
         },
         {
           path: "comments.user",
-          select: "username _id",
+          select: "name _id",
         },
       ])
       .sort({ createdAt: -1 });
@@ -152,27 +157,7 @@ async function getPosts(communityId) {
       });
     }
 
-    const transformedPosts = communityPosts.map((post) => ({
-      _id: post._id.toString(),
-      title: post.title,
-      content: post.content,
-      author: {
-        _id: post.author?._id.toString(),
-        username: post.author?.username || "Unknown",
-      },
-      comments: post.comments?.map((comment) => ({
-        _id: comment._id.toString(),
-        comment: comment.comment,
-        user: {
-          _id: comment.user?._id.toString(),
-          username: comment.user?.username || "Unknown",
-        },
-        createdAt: comment.createdAt,
-      })),
-      createdAt: post.createdAt,
-    }));
-
-    return NextResponse.json({ success: true, posts: transformedPosts });
+    return NextResponse.json({ success: true, posts: communityPosts });
   } catch (err) {
     console.error("Error in getPosts:", err);
     return NextResponse.json(

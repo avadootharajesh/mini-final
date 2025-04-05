@@ -99,9 +99,8 @@ export async function getAuthenticatedUser() {
 
         if (user) {
           return {
+            ...user.toObject(),
             _id: user._id.toString(),
-            name: user.name,
-            email: user.email,
             userType: "user",
             token: userToken,
           };
@@ -118,9 +117,8 @@ export async function getAuthenticatedUser() {
 
         if (seller) {
           return {
+            ...seller.toObject(),
             _id: seller._id.toString(),
-            name: seller.name,
-            email: seller.email,
             userType: "seller",
             token: sellerToken,
           };

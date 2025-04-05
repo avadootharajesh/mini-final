@@ -6,16 +6,17 @@ import CreateCommunityModal from "@/components/pages/community/CommunityForm";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import { getAuthenticatedUser } from "@/../actions/loginActions";
+import { getUserByToken, getToken } from "@/../actions/userActions";
 import CommunityCard from "@/components/pages/community/CommunityCard";
+import axios from "axios";
 
 export default function CommunityPage() {
   const [communities, setCommunities] = useState([]);
   const [user, setUser] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -25,11 +26,20 @@ export default function CommunityPage() {
   const checkAuthAndFetchData = async () => {
     if (typeof window !== "undefined") {
       try {
-        const res = await getAuthenticatedUser();
-        if (res && res.userType === "user") {
-          setToken(res.token);
-          setIsLoggedIn(true);
-          setUser(res);
+        const userToken = await getToken("userToken");
+        console.log("User token from cookies:", userToken);
+        if (userToken) {
+          console.log("User token:", userToken);
+          const res = await getUserByToken(userToken, "user");
+          console.log("User data:", res);
+          if (res.success) {
+            setIsLoggedIn(true);
+            setUser(res.user);
+            setToken(userToken);
+          } else {
+            console.error(res.message);
+            throw new Error(res.message);
+          }
         } else {
           setIsLoggedIn(false);
         }
@@ -38,7 +48,6 @@ export default function CommunityPage() {
         setIsLoggedIn(false);
       }
 
-      // Fetch communities regardless of login status
       await fetchCommunities();
     }
   };
@@ -64,22 +73,36 @@ export default function CommunityPage() {
 
   const handleCreateCommunity = async (communityData) => {
     try {
-      if (!token) {
+      if (!isLoggedIn) {
         toast.error("Please login to create a community");
         router.push("/login");
         return;
       }
 
-      const response = await fetch("/api/community", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ communityData }),
+      if (!token) {
+        toast.error("Authentication token is missing");
+        return;
+      }
+
+      console.log("Creating community with data:", {
+        communityData,
+        token: token ? "Token exists" : "No token",
       });
 
-      const data = await response.json();
+      const response = await axios.post(
+        "/api/community",
+        {
+          communityData,
+          token,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = response.data;
 
       if (data.success) {
         toast.success(data.message || "Community created successfully!");
@@ -89,8 +112,12 @@ export default function CommunityPage() {
         toast.error(data.error || "Failed to create community");
       }
     } catch (error) {
-      console.error("Error creating community:", error);
-      toast.error("Failed to create community");
+      console.error("Error creating community:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      toast.error(error.response?.data?.error || "Failed to create community");
     }
   };
 
@@ -139,7 +166,6 @@ export default function CommunityPage() {
 
         <Separator className="mb-8 bg-white/10" />
 
-        {/* Display communities grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {communities.length > 0 ? (
             communities.map((community) => (
