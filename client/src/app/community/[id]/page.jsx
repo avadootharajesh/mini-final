@@ -6,7 +6,8 @@ import PostCard from "@/components/pages/community/PostCard";
 import PostForm from "@/components/pages/community/PostForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import { getAuthenticatedUser } from "@/../actions/loginActions";
+import axios from "axios";
+import { getUserByToken, getToken } from "@/../actions/userActions";
 
 function CommunityInteriorPage() {
   const params = useParams();
@@ -16,8 +17,8 @@ function CommunityInteriorPage() {
   const [commentsMap, setCommentsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [activePostId, setActivePostId] = useState(null);
   const [token, setToken] = useState(null);
+  const [activePostId, setActivePostId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -28,11 +29,17 @@ function CommunityInteriorPage() {
   const setAuthStatus = async () => {
     if (typeof window !== "undefined") {
       try {
-        const res = await getAuthenticatedUser();
-        if (res && res.userType === "user") {
-          setIsLoggedIn(true);
-          setUser(res);
-          setToken(res.token);
+        const userToken = await getToken("userToken");
+        if (userToken) {
+          const res = await getUserByToken(userToken, "user");
+          if (res.success) {
+            setIsLoggedIn(true);
+            setUser(res.user);
+            setToken(userToken);
+          } else {
+            console.error(res.message);
+            throw new Error(res.message);
+          }
         } else {
           setIsLoggedIn(false);
         }
@@ -97,22 +104,18 @@ function CommunityInteriorPage() {
   };
 
   const handleCreatePost = async (postData) => {
-    if (!isLoggedIn || !token) {
+    if (!isLoggedIn) {
       toast.error("Please login to create a post");
       return;
     }
 
     try {
-      const response = await fetch("/api/post", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ communityId, postData }),
+      const response = await axios.post("/api/post", {
+        communityId,
+        postData,
+        token,
       });
-
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         toast.success("Post created successfully!");
@@ -139,7 +142,7 @@ function CommunityInteriorPage() {
   };
 
   const handleSubmitComment = async (postId, commentText) => {
-    if (!isLoggedIn || !token) {
+    if (!isLoggedIn) {
       toast.error("Please login to comment");
       return;
     }
@@ -150,16 +153,12 @@ function CommunityInteriorPage() {
     }
 
     try {
-      const response = await fetch("/api/comment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ postId, commentText: commentText.trim() }),
+      const response = await axios.post("/api/comment", {
+        postId,
+        commentText: commentText.trim(),
+        token,
       });
-
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         toast.success("Comment posted successfully!");

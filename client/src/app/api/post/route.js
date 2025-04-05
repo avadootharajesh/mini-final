@@ -2,63 +2,53 @@ import User from "@/../db/schema/user.schema";
 import Community from "@/../db/schema/community.schema";
 import CommunityPost from "@/../db/schema/communitypost.schema";
 import { connectToDatabase } from "@/../db/dbConfig";
-import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { getUserByToken } from "@/../actions/userActions";
 
 connectToDatabase();
 
 // Create a new post
 export async function POST(request) {
   try {
-    const { communityId, postData } = await request.json();
-    const token = request.headers.get("authorization")?.split("Bearer ")[1];
-
-    if (!token) {
+    const { communityId, postData, token } = await request.json();
+    if (!token || !postData || !communityId) {
       return NextResponse.json(
-        { success: false, error: "Authentication token is required" },
+        {
+          success: false,
+          error: "Token or post data or community id is missing",
+        },
         { status: 401 }
       );
     }
-
-    if (!communityId) {
+    const response = await getUserByToken(token, "user");
+    if (!response.success) {
       return NextResponse.json(
-        { success: false, error: "Community ID is required" },
-        { status: 400 }
+        { success: false, error: response.message },
+        { status: 401 }
       );
     }
+    const user = response.user;
 
-    const decoded = jwt.verify(token, process.env.JWT_USER_SECRET);
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    const community = await Community.findById(communityId);
+    const community = await Community.findById(communityId).lean();
     if (!community) {
       return NextResponse.json(
         { success: false, error: "Community not found" },
         { status: 404 }
       );
     }
+    const date = new Date();
 
-    // Create the post according to the schema
     const post = new CommunityPost({
       title: postData.title,
       content: postData.content,
-      author: user._id,
-      community: communityId,
-      commentCount: 0, // Initialize comment count to 0
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      author: user._id.toString(),
+      community: communityId.toString(),
+      commentCount: 0,
+      createdAt: date.toISOString(),
+      updatedAt: date.toISOString(),
     });
 
     await post.save();
-
-    // No need to modify the community schema as it doesn't have posts array
 
     return NextResponse.json({
       success: true,
@@ -69,10 +59,10 @@ export async function POST(request) {
         content: post.content,
         author: {
           _id: user._id.toString(),
-          username: user.username,
+          name: user.name,
         },
         commentCount: 0,
-        createdAt: post.createdAt,
+        createdAt: post.createdAt.toISOString(),
       },
     });
   } catch (err) {
@@ -97,7 +87,6 @@ export async function GET(request) {
       );
     }
 
-    // Find all posts for the community and populate author information
     const posts = await CommunityPost.find({ community: communityId })
       .populate("author", "name email")
       .sort({ createdAt: -1 });

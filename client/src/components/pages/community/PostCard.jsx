@@ -18,7 +18,6 @@ function PostCard({
   isCommenting,
   onCancelComment,
   onSubmitComment,
-  currentUser,
 }) {
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
@@ -113,7 +112,7 @@ function PostCard({
                 Cancel
               </Button>
               <Button type="submit" size="sm">
-                Comment
+                Send
               </Button>
             </div>
           </form>

@@ -12,7 +12,7 @@ const messageSchema = new mongoose.Schema({
   },
   attachments: [
     {
-      type: String, // URL to media files
+      type: String,
       default: [],
     },
   ],
@@ -24,7 +24,7 @@ const messageSchema = new mongoose.Schema({
       },
       readAt: {
         type: Date,
-        default: Date.now,
+        default: new Date(),
       },
     },
   ],
@@ -48,17 +48,14 @@ const chatSchema = new mongoose.Schema({
   ],
   groupName: {
     type: String,
-    // Required only for group chats
   },
   groupAvatar: {
     type: String,
-    // Optional for group chats
   },
   admin: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      // Only for group chats
     },
   ],
   messages: [messageSchema],
@@ -76,11 +73,9 @@ const chatSchema = new mongoose.Schema({
   },
 });
 
-// Create a separate Message model for easier querying
 const Message =
   mongoose.models.Message || mongoose.model("Message", messageSchema);
 
-// Adding indexes for better query performance
 chatSchema.index({ participants: 1 });
 chatSchema.index({ updatedAt: -1 });
 

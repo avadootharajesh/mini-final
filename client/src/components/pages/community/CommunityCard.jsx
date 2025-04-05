@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { Users, MessageSquare, Shield } from "lucide-react";
 import Link from "next/link";
@@ -21,12 +20,6 @@ export default function CommunityCard({ community, currentUser }) {
               <MessageSquare size={16} />
               <span>{community.posts?.length || 0}</span>
             </div>
-            {/* {isAdmin && (
-              <div className="flex items-center space-x-1 text-sm text-[#dc2446]">
-                <Shield size={16} />
-                <span>Admin</span>
-              </div>
-            )} */}
           </div>
         </div>
       </div>
