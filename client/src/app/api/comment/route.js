@@ -3,13 +3,14 @@ import Comment from "@/../db/schema/comment.schema";
 import CommunityPost from "@/../db/schema/communitypost.schema";
 import { connectToDatabase } from "@/../db/dbConfig";
 import { NextResponse } from "next/server";
+import { getUserByToken } from "@/../actions/userActions";
 
 connectToDatabase();
 
 // Create a new comment
 export async function POST(request) {
   try {
-    const { postId, commentText, user } = await request.json();
+    const { postId, commentText, token } = await request.json();
 
     if (!postId) {
       return NextResponse.json(
@@ -24,13 +25,20 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
-    if (!user) {
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: "Token is required" },
+        { status: 401 }
+      );
+    }
+    const response = await getUserByToken(token, "user");
+    if (!response.success) {
       return NextResponse.json(
         { success: false, error: "User not found" },
         { status: 404 }
       );
     }
+    const user = response.user;
 
     const post = await CommunityPost.findById(postId);
     if (!post) {
@@ -39,7 +47,6 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-
     const newComment = new Comment({
       comment: commentText,
       user: user._id,
@@ -56,15 +63,7 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: "Comment posted successfully!",
-      comment: {
-        _id: newComment._id.toString(),
-        comment: newComment.comment,
-        user: {
-          _id: user._id.toString(),
-          name: user.name,
-        },
-        createdAt: newComment.createdAt.toString(),
-      },
+      comment: newComment,
     });
   } catch (err) {
     console.error("Error in createComment:", err);
@@ -90,11 +89,12 @@ export async function GET(request) {
 
     const comments = await Comment.find({ post: postId })
       .populate("user", "name email")
-      .sort({ createdAt: -1 });
-
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log(comments);
     return NextResponse.json({
       success: true,
-      ...comments.toObject(),
+      comments,
     });
   } catch (err) {
     console.error("Error getting comments:", err);

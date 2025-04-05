@@ -88,9 +88,10 @@ export async function GET(request) {
     }
 
     const posts = await CommunityPost.find({ community: communityId })
-      .populate("author", "name email")
-      .sort({ createdAt: -1 });
-
+      .populate("author", "name email -_id")
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log(posts);
     return NextResponse.json({
       success: true,
       posts,

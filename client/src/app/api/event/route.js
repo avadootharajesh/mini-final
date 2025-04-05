@@ -10,17 +10,10 @@ export async function GET(request) {
     const upcomingEvents = await Event.find({ eventDate: { $gt: Date.now() } })
       .sort({ eventDate: 1 })
       .lean();
-    const formattedEvents = upcomingEvents.map((event) => ({
-      ...event,
-      _id: event._id?.toString() || "",
-      eventDate: event.eventDate
-        ? new Date(event.eventDate).toISOString()
-        : null,
-    }));
     return NextResponse.json({
       success: true,
       message: "Events fetched successfully",
-      events: formattedEvents,
+      events: upcomingEvents,
     });
   } catch (err) {
     console.error("Error in GET events:", err);
@@ -52,18 +45,16 @@ export async function POST(request) {
     );
   }
   try {
-    const date = new Date();
     const event = new Event({
       ...eventData,
       organisedBy: user._id,
-      createdAt: date.toISOString(),
-      updatedAt: date.toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     await event.save();
     return NextResponse.json({
       success: true,
       message: "New event added successfully",
-      event,
     });
   } catch (err) {
     console.error("Error in POST event:", err);

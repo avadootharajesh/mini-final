@@ -19,7 +19,13 @@ export async function getUserByToken(token, userType) {
     if (!user) {
       return { success: false, message: "User not found" };
     }
-    return { success: true, user };
+    return {
+      success: true,
+      user: {
+        ...user,
+        _id: user._id.toString(),
+      },
+    };
   } catch (error) {
     console.error("Error fetching user by token:", error);
     return { success: false, message: "Error fetching user by token" };

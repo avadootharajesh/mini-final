@@ -20,27 +20,9 @@ export async function GET(request) {
 
     const communities = await Community.find().populate("admin", "name").lean();
 
-    const formattedCommunities = communities.map((community) => ({
-      ...community,
-      _id: community._id?.toString() || "",
-      admin: community.admin
-        ? {
-            _id: community.admin._id?.toString() || "",
-            name: community.admin.name || "Unknown",
-          }
-        : null,
-
-      posts: Array.isArray(community.posts)
-        ? community.posts.map((post) => ({
-            ...post,
-            _id: post._id?.toString() || "",
-          }))
-        : [],
-    }));
-
     return NextResponse.json({
       success: true,
-      communities: formattedCommunities,
+      communities,
     });
   } catch (err) {
     console.error("Error in GET communities:", err);
@@ -128,14 +110,7 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: "Community created successfully!",
-      community: {
-        ...community.toObject(),
-        _id: community._id.toString(),
-        admin: {
-          _id: user._id.toString(),
-          name: user.name,
-        },
-      },
+      community,
     });
   } catch (err) {
     console.error("Error in POST community:", {
@@ -182,27 +157,7 @@ async function getPosts(communityId) {
       });
     }
 
-    const transformedPosts = communityPosts.map((post) => ({
-      _id: post._id.toString(),
-      title: post.title,
-      content: post.content,
-      author: {
-        _id: post.author?._id.toString(),
-        name: post.author?.name || "Unknown",
-      },
-      comments: post.comments?.map((comment) => ({
-        _id: comment._id.toString(),
-        comment: comment.comment,
-        user: {
-          _id: comment.user?._id.toString(),
-          name: comment.user?.name || "Unknown",
-        },
-        createdAt: comment.createdAt,
-      })),
-      createdAt: post.createdAt,
-    }));
-
-    return NextResponse.json({ success: true, posts: transformedPosts });
+    return NextResponse.json({ success: true, posts: communityPosts });
   } catch (err) {
     console.error("Error in getPosts:", err);
     return NextResponse.json(
