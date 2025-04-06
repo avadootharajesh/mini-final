@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { CldUploadWidget } from "next-cloudinary";
 import axios from "axios";
 import { getToken } from "@/../actions/userActions";
 import { useRouter } from "next/navigation";
+import ImageUploader from "@/components/ImageUploader";
 
 const EventForm = () => {
   const [eventData, setEventData] = useState({
@@ -36,6 +36,7 @@ const EventForm = () => {
 
     fetchToken();
   }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEventData((prev) => ({
@@ -88,15 +89,6 @@ const EventForm = () => {
       if (response.data.success) {
         setMessage("Event created successfully!");
         router.push("/events");
-        // setEventData({
-        //   title: "",
-        //   description: "",
-        //   image: "",
-        //   eventDate: "",
-        //   eventTime: "",
-        //   location: "",
-        // });
-        // setImageUploaded(false);
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -150,39 +142,11 @@ const EventForm = () => {
               rows="3"></textarea>
           </div>
 
-          <div>
-            <label className="block mb-1 font-medium">Event Image</label>
-            <div className="mb-2">
-              <CldUploadWidget
-                uploadPreset="Furrever"
-                onSuccess={handleOnUpload}
-                onError={handleUploadError}
-                options={{
-                  sources: ["local", "url", "camera"],
-                  multiple: false,
-                  maxFiles: 1,
-                }}>
-                {({ open }) => (
-                  <button
-                    type="button"
-                    onClick={() => open()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                    {eventData.image ? "Change Image" : "Upload Image"}
-                  </button>
-                )}
-              </CldUploadWidget>
-            </div>
-
-            {imageUploaded && eventData.image && (
-              <div className="mt-2">
-                <img
-                  src={eventData.image}
-                  alt="Event preview"
-                  className="h-40 object-contain border rounded p-1"
-                />
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            image={eventData.image}
+            onUploadSuccess={handleOnUpload}
+            onUploadError={handleUploadError}
+          />
 
           <div>
             <label className="block mb-1 font-medium">Event Date</label>

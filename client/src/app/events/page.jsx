@@ -31,7 +31,7 @@ export default function EventsPage() {
     };
 
     fetchEvents();
-  }, [isDialogOpen]); // Refetch when dialog closes
+  }, [isDialogOpen]);
 
   const handleDialogChange = (open) => {
     setIsDialogOpen(open);
@@ -110,7 +110,7 @@ export default function EventsPage() {
                   variant="outline"
                   className="w-full mt-4"
                   onClick={() => {
-                    // Handle view event details - you can implement this later
+                    // Handle view event details
                     console.log("View event:", event._id);
                   }}>
                   View Details
