@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star, Truck } from "lucide-react";
+import { ShoppingCart, Star, Truck, LogOut, Home, CreditCard } from "lucide-react";
 import { useState } from "react";
 
 const products = [
@@ -44,11 +44,28 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E3DAC9] p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-[#355E3B] mb-6 text-center">
-          The Cozy Store 🛍️
-        </h1>
+    <div className="min-h-screen bg-[#E3DAC9]">
+      {/* Navigation Bar */}
+      <nav className="bg-[#355E3B] text-[#E3DAC9] p-4 shadow-md flex justify-between items-center">
+        <h1 className="text-2xl font-bold">The Cozy Store 🛍️</h1>
+        <div className="flex gap-4">
+          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
+            <Home className="mr-2" size={16} /> Home
+          </Button>
+          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
+            <ShoppingCart className="mr-2" size={16} /> Cart ({cart.length})
+          </Button>
+          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
+            <CreditCard className="mr-2" size={16} /> Checkout
+          </Button>
+          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
+            <LogOut className="mr-2" size={16} /> Logout
+          </Button>
+        </div>
+      </nav>
+
+      {/* Store Content */}
+      <div className="max-w-6xl mx-auto p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <Card
@@ -76,6 +93,8 @@ export default function StorePage() {
             </Card>
           ))}
         </div>
+
+        {/* Shipping Promo */}
         <div className="mt-10 p-6 bg-[#355E3B] text-[#E3DAC9] rounded-xl text-center">
           <h2 className="text-2xl font-bold">🚚 Free Shipping on orders over $50!</h2>
           <p className="mt-2 text-sm flex items-center justify-center gap-2">

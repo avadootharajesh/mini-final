@@ -4,6 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 import { registerAction } from "../../../../actions/registerActions";
 
+<<<<<<< HEAD
+=======
+import { registerUser } from "./actions";
+import toast from "react-hot-toast";
+
+>>>>>>> 1aac42a (cloudinary config)
 const RegisterPage = () => {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -64,7 +70,12 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
+<<<<<<< HEAD
           htmlFor="name">
+=======
+          htmlFor="name"
+        >
+>>>>>>> 1aac42a (cloudinary config)
           Name
         </label>
         <input
@@ -81,7 +92,12 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
+<<<<<<< HEAD
           htmlFor="email">
+=======
+          htmlFor="email"
+        >
+>>>>>>> 1aac42a (cloudinary config)
           Email
         </label>
         <input
@@ -98,7 +114,12 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
+<<<<<<< HEAD
           htmlFor="password">
+=======
+          htmlFor="password"
+        >
+>>>>>>> 1aac42a (cloudinary config)
           Password
         </label>
         <input
@@ -115,7 +136,12 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
+<<<<<<< HEAD
           htmlFor="confirmPassword">
+=======
+          htmlFor="confirmPassword"
+        >
+>>>>>>> 1aac42a (cloudinary config)
           Confirm Password
         </label>
         <input
@@ -132,7 +158,12 @@ const RegisterPage = () => {
       <button
         type="submit"
         disabled={loading}
+<<<<<<< HEAD
         className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed">
+=======
+        className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed"
+      >
+>>>>>>> 1aac42a (cloudinary config)
         {loading ? "Registering..." : `Register as ${user.userType}`}
       </button>
     </form>
@@ -146,12 +177,22 @@ const RegisterPage = () => {
           <TabsList>
             <TabsTrigger
               value="user"
+<<<<<<< HEAD
               onClick={() => handleUserTypeChange("user")}>
+=======
+              onClick={() => handleUserTypeChange("user")}
+            >
+>>>>>>> 1aac42a (cloudinary config)
               User Account
             </TabsTrigger>
             <TabsTrigger
               value="seller"
+<<<<<<< HEAD
               onClick={() => handleUserTypeChange("seller")}>
+=======
+              onClick={() => handleUserTypeChange("seller")}
+            >
+>>>>>>> 1aac42a (cloudinary config)
               Seller Account
             </TabsTrigger>
           </TabsList>

@@ -36,6 +36,9 @@ import {
 import { logout } from "@/lib/userutils";
 
 export default function SellerDashboard() {
+
+  const router = useRouter();
+
   const [products, setProducts] = useState([]);
 
   return (
@@ -51,7 +54,11 @@ export default function SellerDashboard() {
           <li className="flex items-center gap-2 cursor-pointer">
             <ShoppingCart className="w-5 h-5" /> Orders & Sales
           </li>
-          <li className="flex items-center gap-2 cursor-pointer">
+          <li className="flex items-center gap-2 cursor-pointer"
+            onClick={() => {
+              router.push("/dashboard/add-product");
+            }}
+          >
             <PackagePlus className="w-5 h-5" /> Add Product
           </li>
           <li className="flex items-center gap-2 cursor-pointer">
