@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import { getToken, getUserByToken } from "@/../actions/userActions";
 import { io } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 const ChatPage = () => {
   const socket = useMemo(() => io("http://localhost:8080"), []);
@@ -9,8 +11,20 @@ const ChatPage = () => {
   const [room, setRoom] = useState("");
   const [socketId, setSocketId] = useState("");
   const [roomName, setRoomName] = useState("");
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    connectSocket();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const connectSocket = async () => {
+    await checkAuth();
     socket.connect();
     socket.on("connect", () => {
       setSocketId(socket.id);
@@ -20,17 +34,39 @@ const ChatPage = () => {
       console.log("Received message:", data);
       setMessages((prevMessages) => [...prevMessages, data.message]);
     });
+  };
 
-    return () => {
-      socket.disconnect(); // Remove event listener on unmount
-    };
-  }, []);
+  const checkAuth = async () => {
+    if (typeof window !== "undefined") {
+      try {
+        const userToken = await getToken("userToken");
+        console.log("User token from cookies:", userToken);
+        if (userToken) {
+          const res = await getUserByToken(userToken, "user");
+          console.log("User data:", res);
+          if (res.success) {
+            setIsLoggedIn(true);
+            setUser(res.user);
+            setToken(userToken);
+          } else {
+            console.error(res.message);
+            throw new Error(res.message);
+          }
+        } else {
+          throw new Error("No token found");
+        }
+      } catch (error) {
+        console.error("Auth verification error:", error);
+        router.push("/login");
+      }
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim()) {
       socket.emit("message", { message, room });
-      setMessage(""); // Clear the input field
+      setMessage("");
       console.log("Message has been emitted");
     } else console.log("Message is empty");
   };
@@ -40,7 +76,7 @@ const ChatPage = () => {
       socket.emit("join-room", roomName);
       console.log("Room joined:", roomName);
     }
-    setRoomName(""); // Clear the input field
+    setRoomName("");
   };
 
   return (
@@ -60,7 +96,7 @@ const ChatPage = () => {
           placeholder="Enter room id"
           value={roomName}
           onChange={(e) => setRoomName(e.target.value)}
-          lassName="mt-2 p-2 border rounded w-96"
+          className="mt-2 p-2 border rounded w-96"
         />
         <button type="submit">Join</button>
       </form>

@@ -9,6 +9,10 @@ const eventSchema = new Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: true,
+  },
   eventDate: {
     type: Date,
     required: true,
