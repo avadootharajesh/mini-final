@@ -12,8 +12,6 @@ import Link from "next/link";
 import { getAuthenticatedUser } from "../../../../actions/loginActions";
 import axios from "axios";
 
-import { uploadImagesToCloudinary } from "../../../../db/cloudinary/db";
-
 export default function AddProductPage() {
   const [form, setForm] = useState({
     name: "",
@@ -27,6 +25,10 @@ export default function AddProductPage() {
 
   const [images, setImages] = useState([]); // files
   const [previewUrls, setPreviewUrls] = useState([]); // preview
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [user, setUser] = useState(null);
   const router = useRouter();
@@ -69,33 +71,33 @@ export default function AddProductPage() {
   }, []);
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
 
     // Step 1: Upload images to Cloudinary
     let uploadedImageUrls = [];
 
     try {
-      const imageFormData = new FormData();
-      images.forEach((image) => {
-        imageFormData.append("files", image); // backend expects 'files' key
-      });
+      const readFileAsBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      };
 
-      const cloudinaryRes = await fetch("/api/product/upload-image", {
-        method: "POST",
-        body: previewUrls,
-      });
-
-      const cloudinaryData = await cloudinaryRes.json();
-
-      if (!cloudinaryData.success) {
-        throw new Error(cloudinaryData.error || "Image upload failed");
+      // Step 1: Upload each image to Cloudinary via your API
+      for (const image of images) {
+        const base64 = await readFileAsBase64(image);
+        const res = await axios.post("/api/product/upload-image", { base64 });
+        uploadedImageUrls.push(res.data.url); // adjust based on your response
       }
-
-      uploadedImageUrls = cloudinaryData.urls; // array of secure URLs
       toast.success("Images uploaded successfully!");
     } catch (error) {
       console.error("Cloudinary Upload Error:", error);
       toast.error("Failed to upload images");
+      setLoading(false);
       return;
     }
 
@@ -128,6 +130,8 @@ export default function AddProductPage() {
     } catch (error) {
       console.error("Error adding product:", error);
       toast.error("Failed to add product");
+      setLoading(false);
+      return;
     } finally {
       setForm({
         name: "",
@@ -139,12 +143,23 @@ export default function AddProductPage() {
       });
       setImages([]);
       setPreviewUrls([]);
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#F3F3F3]">
       {/* Navbar */}
+
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="text-white text-xl font-semibold animate-pulse">
+            Loading... <br />
+            Please wait!
+          </div>
+        </div>
+      )}
+
       <nav className="flex justify-between items-center bg-[#355E3B] text-white p-4 shadow-md">
         <h1 className="text-xl font-bold">Add Product</h1>
         <div className="flex items-center gap-4">

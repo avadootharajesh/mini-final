@@ -1,7 +1,7 @@
 import { connectToDatabase } from "./dbConfig";
 
 import User from "./schema/user.schema";
-import Chat from "./schema/chat.schema";
+// import Chat from "./schema/chat";
 import Seller from "./schema/seller.schema";
 import Product from "./schema/product.schema";
 

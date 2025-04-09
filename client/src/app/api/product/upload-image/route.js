@@ -1,66 +1,36 @@
 import { v2 as cloudinary } from "cloudinary";
-// import formidable from "formidable";
-// import fs from "fs";
 
-import { NextResponse } from "next/server";
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dx0o34ckc",
+  api_key: process.env.CLOUDINARY_API_KEY || "944247377554193",
+  api_secret:
+    process.env.CLOUDINARY_API_SECRET || "BUKc9458wGt5V7PGHcYEK4X5kww",
+});
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: {
+      sizeLimit: "10mb",
+    },
   },
 };
 
-cloudinary.config({
-  cloud_name: "dx0o34ckc",
-  api_key: "944247377554193",
-  api_secret: process.env.CLOUDINARY_SECRET || "BUKc9458wGt5V7PGHcYEK4X5kww",
-});
-
 export async function POST(req) {
   try {
-    const data = req.body;
-    console.log("Received POST request");
-    console.log(data);
-    return NextResponse.json({ status: 200, message: "success" });
+    const { base64 } = await req.json();
+
+    const uploadResponse = await cloudinary.uploader.upload(base64, {
+      folder: "pet-store/products", // optional folder name
+    });
+
+    return new Response(JSON.stringify({ url: uploadResponse.secure_url }), {
+      status: 200,
+    });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ status: 500, message: error.message });
+    console.error("Cloudinary Upload Failed:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to upload image to Cloudinary" }),
+      { status: 500 }
+    );
   }
 }
-
-// export default async function handler(req, res) {
-//   console.log("Received POST request");
-//   if (req.method === "POST") {
-//     console.log("Received POST request --->");
-//   }
-//   if (req.method !== "POST") {
-//     return res.status(405).json({ error: "Method not allowed" });
-//   }
-//   console.log("Received POST request");
-//   const form = new formidable.IncomingForm();
-//   form.uploadDir = "./public/uploads";
-//   form.keepExtensions = true;
-
-//   form.parse(req, async (err, fields, files) => {
-//     if (err) return res.status(500).json({ error: err.message });
-
-//     const fileArray = Array.isArray(files.files) ? files.files : [files.files];
-
-//     try {
-//       const uploadedUrls = await Promise.all(
-//         fileArray.map((file) =>
-//           cloudinary.uploader.upload(file.filepath, {
-//             folder: "petstore_images",
-//           })
-//         )
-//       );
-
-//       const urls = uploadedUrls.map((result) => result.secure_url);
-
-//       res.status(200).json({ success: true, urls });
-//     } catch (uploadError) {
-//       console.error(uploadError);
-//       res.status(500).json({ success: false, error: uploadError.message });
-//     }
-//   });
-// }
