@@ -35,7 +35,7 @@
     "lightning": "^10.25.0",
     "lucide-react": "^0.482.0",
     "mongodb": "^6.14.2",
-    "mongoose": "^8.12.2",
+    "mongoose": "^8.13.2",
     "next": "15.2.2",
     "next-cloudinary": "^6.16.0",
     "react": "^19.0.0",

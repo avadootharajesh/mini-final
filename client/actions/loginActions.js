@@ -9,11 +9,18 @@ import { z } from "zod";
 import { setCookie } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import mongoose from "mongoose";
 
 const JWT_USER_SECRET = process.env.JWT_USER_SECRET;
 const JWT_SELLER_SECRET = process.env.JWT_SELLER_SECRET;
 
-connectToDatabase;
+// Ensure database is connected before proceeding
+// This is better than just the function reference
+try {
+  connectToDatabase();
+} catch (error) {
+  console.error("Initial database connection failed:", error);
+}
 
 const loginValidationSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,6 +34,7 @@ const loginValidationSchema = z.object({
 
 export async function loginAction(formData) {
   try {
+    // Validate form data
     const parsedData = loginValidationSchema.safeParse(formData);
 
     if (!parsedData.success) {
@@ -38,8 +46,30 @@ export async function loginAction(formData) {
 
     const { email, password, userType } = parsedData.data;
 
+    // Ensure DB connection is active
+    await connectToDatabase();
+    
+    // Select the appropriate model
     const Member = userType === "user" ? User : Seller;
-    const user = await Member.findOne({ email });
+    
+    // Modified findOne with explicit try/catch and timeout handling
+    let user;
+    try {
+      // Use a more efficient query with only necessary fields
+      user = await Member.findOne({ email }).select('+password').lean().exec();
+    } catch (dbError) {
+      console.error("Database query failed:", dbError);
+      if (dbError instanceof mongoose.Error.MongooseServerSelectionError) {
+        return {
+          success: false,
+          error: "Could not connect to database. Please check if MongoDB is running.",
+        };
+      }
+      return {
+        success: false,
+        error: "Database error occurred: " + dbError.message,
+      };
+    }
 
     if (!user) {
       return {
@@ -64,6 +94,9 @@ export async function loginAction(formData) {
     await clearAllCookies();
     await setCookie(token, userType);
 
+    // Remove password from returned user object
+    delete user.password;
+
     return {
       success: true,
       user: {
@@ -77,7 +110,7 @@ export async function loginAction(formData) {
     console.error("Login error:", error);
     return {
       success: false,
-      error: "An error occurred during login",
+      error: "An error occurred during login: " + error.message,
     };
   }
 }
