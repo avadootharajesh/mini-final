@@ -15,7 +15,7 @@ const page = () => {
   }, []);
   return (
     <>
-      {user && user.userType === "seller" ? (
+      {!user || user.userType === "seller" ? (
         <SellerDashboard />
       ) : (
         <UserDashboard />

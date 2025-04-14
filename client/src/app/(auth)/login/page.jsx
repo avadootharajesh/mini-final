@@ -92,6 +92,16 @@ const LoginPage = () => {
         className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed">
         {loading ? "Logging in..." : `Login as ${user.userType}`}
       </button>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{" "}
+          <button
+            onClick={() => router.push("/register")}
+            className="text-yellow-800 hover:text-yellow-700 font-medium">
+            Register here
+          </button>
+        </p>
+      </div>
     </form>
   );
 

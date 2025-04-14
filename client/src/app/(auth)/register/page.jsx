@@ -4,6 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 import { registerAction } from "../../../../actions/registerActions";
 
+import { registerUser } from "./actions";
+import toast from "react-hot-toast";
+
 const RegisterPage = () => {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -64,7 +67,8 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="name">
+          htmlFor="name"
+        >
           Name
         </label>
         <input
@@ -81,7 +85,8 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email">
+          htmlFor="email"
+        >
           Email
         </label>
         <input
@@ -98,7 +103,8 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="password">
+          htmlFor="password"
+        >
           Password
         </label>
         <input
@@ -115,7 +121,8 @@ const RegisterPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="confirmPassword">
+          htmlFor="confirmPassword"
+        >
           Confirm Password
         </label>
         <input
@@ -132,9 +139,20 @@ const RegisterPage = () => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed">
+        className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed"
+      >
         {loading ? "Registering..." : `Register as ${user.userType}`}
       </button>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Already have an account?{" "}
+          <button
+            onClick={() => router.push("/login")}
+            className="text-yellow-800 hover:text-yellow-700 font-medium">
+            Login here
+          </button>
+        </p>
+      </div>
     </form>
   );
 
@@ -146,12 +164,14 @@ const RegisterPage = () => {
           <TabsList>
             <TabsTrigger
               value="user"
-              onClick={() => handleUserTypeChange("user")}>
+              onClick={() => handleUserTypeChange("user")}
+            >
               User Account
             </TabsTrigger>
             <TabsTrigger
               value="seller"
-              onClick={() => handleUserTypeChange("seller")}>
+              onClick={() => handleUserTypeChange("seller")}
+            >
               Seller Account
             </TabsTrigger>
           </TabsList>
