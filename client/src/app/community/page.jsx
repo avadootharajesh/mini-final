@@ -42,6 +42,7 @@ export default function CommunityPage() {
           }
         } else {
           setIsLoggedIn(false);
+          console.log("No authentication token found");
         }
       } catch (error) {
         console.error("Auth verification error:", error);
