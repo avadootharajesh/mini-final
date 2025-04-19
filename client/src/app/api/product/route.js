@@ -21,7 +21,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    const userId = mongoose.Types.ObjectId(user._id);
+    const userId = new mongoose.Types.ObjectId(user._id);
     console.log(" User ID: ", userId);
 
     const productData = {

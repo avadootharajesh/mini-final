@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Bangers&family=Charmonman:wght@400;700&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Dancing+Script:wght@400..700&family=Festive&family=Fuzzy+Bubbles:wght@400;700&family=Kaushan+Script&family=Londrina+Shadow&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Satisfy&display=swap");
 
+@import url("../../node_modules/@cometchat/chat-uikit-react/dist/styles/css-variables.css");
+
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
