@@ -1,0 +1,191 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import {
+  CometChatMessageComposer,
+  CometChatMessageHeader,
+  CometChatMessageList,
+  CometChatUIKit,
+  UIKitSettingsBuilder,
+} from "@cometchat/chat-uikit-react";
+import { CometChat } from "@cometchat/chat-sdk-javascript";
+import { CometChatSelector } from "../CometChatSelector/CometChatSelector";
+import "./CometChatNoSSR.css";
+
+// Constants for CometChat configuration
+const COMETCHAT_CONSTANTS = {
+  APP_ID: process.env.NEXT_PUBLIC_COMETCHAT_APP_ID,
+  REGION: process.env.NEXT_PUBLIC_COMETCHAT_REGION,
+  AUTH_KEY: process.env.NEXT_PUBLIC_COMETCHAT_AUTH_KEY,
+};
+
+// Functional component for CometChatNoSSR
+const CometChatNoSSR = ({ currentUser }) => {
+  const [isCometChatReady, setIsCometChatReady] = useState(false);
+  const [error, setError] = useState(null);
+  // State to store the logged-in user
+  const [user, setUser] = useState(null);
+  // State to store selected user or group
+  const [selectedUser, setSelectedUser] = useState(undefined);
+  const [selectedGroup, setSelectedGroup] = useState(undefined);
+  let isMounted = true;
+
+  // useEffect(() => {
+  //   // Cleanup function to set isMounted to false when component unmounts
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    const initCometChat = async () => {
+      try {
+        // --- 1. Get Your Application's Current User ---
+        console.log("User data in cometchat init:", currentUser);
+
+        // Check if user is available before proceeding
+        if (!currentUser || !currentUser._id) {
+          throw new Error(
+            "Application user not found. Cannot initialize chat."
+          );
+        }
+
+        const UID = currentUser._id;
+        const name = currentUser.name || UID;
+        const authKey = COMETCHAT_CONSTANTS.AUTH_KEY;
+        const region = COMETCHAT_CONSTANTS.REGION;
+
+        // Initialize UIKit settings
+        const UIKitSettings = new UIKitSettingsBuilder()
+          .setAppId(COMETCHAT_CONSTANTS.APP_ID)
+          .setRegion(COMETCHAT_CONSTANTS.REGION)
+          .setAuthKey(COMETCHAT_CONSTANTS.AUTH_KEY)
+          .subscribePresenceForAllUsers()
+          .build();
+
+        // Initialize CometChat if needed
+        const initialized = await CometChat.isInitialized();
+        if (!initialized) {
+          console.log("Initializing CometChat...");
+          const appSettings = new CometChat.AppSettingsBuilder()
+            .subscribePresenceForAllUsers()
+            .setRegion(region)
+            .build();
+
+          await CometChatUIKit.init(UIKitSettings);
+          console.log("Initialization completed successfully");
+        } else {
+          console.log("CometChat already initialized.");
+        }
+
+        // Check if user is already logged in
+        let loggedInUser = await CometChat.getLoggedinUser();
+
+        if (!loggedInUser) {
+          console.log(`Attempting login for UID: ${UID}...`);
+          try {
+            loggedInUser = await CometChat.login(UID, authKey);
+            console.log("Login Successful:", { loggedInUser });
+          } catch (loginError) {
+            console.warn("Login failed:", loginError);
+            // Check if the error is because the user doesn't exist
+            if (
+              loginError?.code === "ERR_UID_NOT_FOUND" ||
+              loginError?.message?.includes("not found")
+            ) {
+              console.log(
+                `User UID ${UID} not found in CometChat. Attempting to create...`
+              );
+              try {
+                const userToCreate = new CometChat.User(UID);
+                userToCreate.setName(name || UID); // Use name, fallback to UID if name is not available
+                const createdUser = await CometChat.createUser(
+                  userToCreate,
+                  authKey
+                );
+                console.log("User created successfully:", createdUser);
+
+                // Try logging in again after successful creation
+                console.log(`Retrying login for UID: ${UID}...`);
+                loggedInUser = await CometChat.login(UID, authKey);
+                console.log("Login successful after user creation:", {
+                  loggedInUser,
+                });
+              } catch (creationError) {
+                console.error(
+                  "Failed to create user in CometChat:",
+                  creationError
+                );
+                throw new Error(
+                  `Failed to create or log in user ${UID}. Creation error: ${creationError.message}`
+                );
+              }
+            } else {
+              // Login failed for a reason other than user not found
+              throw new Error(`CometChat login failed: ${loginError.message}`);
+            }
+          }
+        } else {
+          console.log("User already logged in:", loggedInUser);
+        }
+
+        // Set user state if component is still mounted
+        if (isMounted) {
+          setUser(loggedInUser);
+          setIsCometChatReady(true);
+        }
+      } catch (err) {
+        console.error("CometChat initialization error:", err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      }
+    };
+
+    initCometChat();
+  }, []);
+
+  if (error) {
+    return <div className="chat-error">Error: {error}</div>;
+  }
+
+  return !isCometChatReady && !user ? (
+    <div className="chat-loading">Loading chat interface...</div>
+  ) : (
+    <div className="conversations-with-messages">
+      {/* Sidebar with conversation list */}
+      <div className="conversations-wrapper">
+        <CometChatSelector
+          onSelectorItemClicked={(activeItem) => {
+            let item = activeItem;
+            if (activeItem instanceof CometChat.Conversation) {
+              item = activeItem.getConversationWith();
+            }
+            if (item instanceof CometChat.User) {
+              setSelectedUser(item);
+              setSelectedGroup(undefined);
+            } else if (item instanceof CometChat.Group) {
+              setSelectedUser(undefined);
+              setSelectedGroup(item);
+            } else {
+              setSelectedUser(undefined);
+              setSelectedGroup(undefined);
+            }
+          }}
+        />
+      </div>
+
+      {/* Message view section */}
+      {selectedUser || selectedGroup ? (
+        <div className="messages-wrapper">
+          <CometChatMessageHeader user={selectedUser} group={selectedGroup} />
+          <CometChatMessageList user={selectedUser} group={selectedGroup} />
+          <CometChatMessageComposer user={selectedUser} group={selectedGroup} />
+        </div>
+      ) : (
+        <div className="empty-conversation">Select Conversation to start</div>
+      )}
+    </div>
+  );
+};
+export default CometChatNoSSR;
