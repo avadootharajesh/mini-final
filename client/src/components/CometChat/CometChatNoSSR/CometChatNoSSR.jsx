@@ -214,6 +214,7 @@ const CometChatNoSSR = ({ currentUser }) => {
 
       {/* Add Incoming and Outgoing Call Components */}
       <CometChatIncomingCall />
+      {/* Disable outgoing call sound by setting URL to null */}
       <CometChatOutgoingCall />
     </div>
   );
