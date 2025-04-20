@@ -38,6 +38,7 @@ export async function loginAction(formData) {
     const parsedData = loginValidationSchema.safeParse(formData);
 
     if (!parsedData.success) {
+      console.log("Invalid parse of user data");
       return {
         success: false,
         error: parsedData.error.errors.map((e) => e.message).join(", "),
@@ -48,21 +49,27 @@ export async function loginAction(formData) {
 
     // Ensure DB connection is active
     await connectToDatabase();
-    
+
     // Select the appropriate model
     const Member = userType === "user" ? User : Seller;
-    
+
     // Modified findOne with explicit try/catch and timeout handling
     let user;
     try {
       // Use a more efficient query with only necessary fields
-      user = await Member.findOne({ email }).select('+password').lean().exec();
+      user = await Member.findOne({ email }).select("+password").lean().exec();
+      // user = await Member.findOne({ email }).select("+password")
+      // this is to prevent the db from timing out
+      // console.log("Database query successful");
+      // lean () means it returns a plain JS object
+      // exec () means it returns a promise
     } catch (dbError) {
       console.error("Database query failed:", dbError);
       if (dbError instanceof mongoose.Error.MongooseServerSelectionError) {
         return {
           success: false,
-          error: "Could not connect to database. Please check if MongoDB is running.",
+          error:
+            "Could not connect to database. Please check if MongoDB is running.",
         };
       }
       return {

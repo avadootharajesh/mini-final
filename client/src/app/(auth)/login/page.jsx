@@ -55,7 +55,7 @@ const LoginPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email">
+          htmlFor="email" name="email">
           Email
         </label>
         <input
@@ -72,7 +72,7 @@ const LoginPage = () => {
       <div className="mb-4">
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="password">
+          htmlFor="password" name="password">
           Password
         </label>
         <input
@@ -89,6 +89,7 @@ const LoginPage = () => {
       <button
         type="submit"
         disabled={loading}
+        name="submit"
         className="w-full bg-yellow-800 text-white py-2 rounded-lg hover:bg-yellow-700 transition duration-300 disabled:bg-yellow-500 disabled:cursor-not-allowed">
         {loading ? "Logging in..." : `Login as ${user.userType}`}
       </button>
