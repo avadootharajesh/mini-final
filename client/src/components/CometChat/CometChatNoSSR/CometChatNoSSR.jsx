@@ -7,6 +7,8 @@ import {
   CometChatMessageList,
   CometChatUIKit,
   UIKitSettingsBuilder,
+  CometChatIncomingCall, // <-- Import Incoming Call component
+  CometChatOutgoingCall, // <-- Import Outgoing Call component
 } from "@cometchat/chat-uikit-react";
 import { CometChat } from "@cometchat/chat-sdk-javascript";
 import { CometChatSelector } from "../CometChatSelector/CometChatSelector";
@@ -30,14 +32,22 @@ const CometChatNoSSR = ({ currentUser }) => {
   const [selectedGroup, setSelectedGroup] = useState(undefined);
   let isMounted = true;
 
-  // useEffect(() => {
-  //   // Cleanup function to set isMounted to false when component unmounts
-  //   return () => {
-  //     isMounted = false;
-  //   };
-  // }, []);
+  useEffect(() => {
+    // Cleanup function to set isMounted to false when component unmounts
+    return () => {
+      console.log("CometChatNoSSR component unmounting. Logging out...");
+      CometChat.logout()
+        .then(() => {
+          console.log("CometChat logout successful.");
+        })
+        .catch((error) => {
+          console.error("CometChat logout failed:", error);
+        });
+    };
+  }, []);
 
   useEffect(() => {
+    let isComponentMounted = true; // Use a local variable for mount status within this effect
     const initCometChat = async () => {
       try {
         // --- 1. Get Your Application's Current User ---
@@ -65,17 +75,26 @@ const CometChatNoSSR = ({ currentUser }) => {
 
         // Initialize CometChat if needed
         const initialized = await CometChat.isInitialized();
+        // Always initialize UIKit for this component instance
+        console.log("Initializing CometChat UI Kit...");
+        await CometChatUIKit.init(UIKitSettings);
+        console.log("UI Kit Initialization completed successfully");
+
         if (!initialized) {
-          console.log("Initializing CometChat...");
+          console.log("Initializing CometChat SDK...");
           const appSettings = new CometChat.AppSettingsBuilder()
             .subscribePresenceForAllUsers()
             .setRegion(region)
             .build();
-
-          await CometChatUIKit.init(UIKitSettings);
-          console.log("Initialization completed successfully");
+          // SDK Init is implicitly handled by UIKit Init if not already done,
+          // but calling CometChat.init might be necessary if specific SDK setup is needed before login.
+          // For now, let's rely on UIKit's initialization.
+          // await CometChat.init(COMETCHAT_CONSTANTS.APP_ID, appSettings);
+          console.log(
+            "CometChat SDK Initialization completed successfully (via UI Kit)."
+          );
         } else {
-          console.log("CometChat already initialized.");
+          console.log("CometChat SDK was already initialized.");
         }
 
         // Check if user is already logged in
@@ -129,21 +148,26 @@ const CometChatNoSSR = ({ currentUser }) => {
           console.log("User already logged in:", loggedInUser);
         }
 
-        // Set user state if component is still mounted
-        if (isMounted) {
+        // Set user state only if component is still mounted
+        if (isComponentMounted) {
           setUser(loggedInUser);
           setIsCometChatReady(true);
         }
       } catch (err) {
         console.error("CometChat initialization error:", err);
-        if (isMounted) {
+        if (isComponentMounted) {
           setError(err.message);
         }
       }
     };
 
     initCometChat();
-  }, []);
+
+    // Cleanup for this effect
+    return () => {
+      isComponentMounted = false;
+    };
+  }, [currentUser]);
 
   if (error) {
     return <div className="chat-error">Error: {error}</div>;
@@ -158,9 +182,11 @@ const CometChatNoSSR = ({ currentUser }) => {
         <CometChatSelector
           onSelectorItemClicked={(activeItem) => {
             let item = activeItem;
+            // Extract the conversation participant
             if (activeItem instanceof CometChat.Conversation) {
               item = activeItem.getConversationWith();
             }
+            // Update states based on the type of selected item
             if (item instanceof CometChat.User) {
               setSelectedUser(item);
               setSelectedGroup(undefined);
@@ -185,7 +211,13 @@ const CometChatNoSSR = ({ currentUser }) => {
       ) : (
         <div className="empty-conversation">Select Conversation to start</div>
       )}
+
+      {/* Add Incoming and Outgoing Call Components */}
+      <CometChatIncomingCall />
+      {/* Disable outgoing call sound by setting URL to null */}
+      <CometChatOutgoingCall />
     </div>
   );
 };
+
 export default CometChatNoSSR;
