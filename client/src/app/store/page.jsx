@@ -1,9 +1,19 @@
-'use client'
+"use client";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star, Truck, LogOut, Home, CreditCard } from "lucide-react";
-import { useState } from "react";
+import {
+  ShoppingCart,
+  Star,
+  Truck,
+  LogOut,
+  Home,
+  CreditCard,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { fetchProducts } from "../../../actions/storeActions";
 
 const products = [
   {
@@ -38,10 +48,27 @@ const products = [
 
 export default function StorePage() {
   const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  const router = useRouter();
 
   const addToCart = (product) => {
     setCart([...cart, product]);
   };
+
+  useEffect(() => {
+    fetchProducts().then((products) => setProducts(products));
+
+    let interval;
+    setTimeout(() => {
+      interval = setInterval(() => {
+        console.log("Updating products...", products);
+      }, 2000);
+    });
+    setTimeout(() => {
+      clearInterval(interval);
+    }, 10000);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#E3DAC9]">
@@ -67,38 +94,55 @@ export default function StorePage() {
       {/* Store Content */}
       <div className="max-w-6xl mx-auto p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <Card
-              key={product.id}
-              className="bg-[#DAC8AE] shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform"
-            >
-              <img src={product.image} alt={product.name} className="w-full h-40 object-cover" />
-              <CardContent className="p-4">
-                <CardTitle className="text-lg font-semibold text-[#355E3B]">
-                  {product.name}
-                </CardTitle>
-                <p className="text-[#00693E] font-bold text-lg">{product.price}</p>
-                <div className="flex items-center gap-1 text-[#2E8B57]">
-                  {Array.from({ length: Math.round(product.rating) }).map((_, i) => (
-                    <Star key={i} size={16} fill="#A0785A" stroke="none" />
-                  ))}
-                </div>
-                <Button
-                  className="mt-3 w-full bg-[#2E8B57] hover:bg-[#00693E]"
-                  onClick={() => addToCart(product)}
-                >
-                  Add to Cart <ShoppingCart className="ml-2" size={16} />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {products &&
+            products.map((product) => (
+              <Card
+                key={product._id}
+                className="bg-[#DAC8AE] shadow-lg rounded-xl overflow-hidden hover:scale-105 transition-transform"
+                onClick={() => {
+                  console.log("Product clicked:", product);
+                  localStorage.setItem("product", JSON.stringify(product));
+                  router.push(`/store/product`);
+                }}
+              >
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-40 object-cover"
+                />
+                <CardContent className="p-4">
+                  <CardTitle className="text-lg font-semibold text-[#355E3B]">
+                    {product.name}
+                  </CardTitle>
+                  <p className="text-[#00693E] font-bold text-lg">
+                    {product.price}
+                  </p>
+                  <div className="flex items-center gap-1 text-[#2E8B57]">
+                    {Array.from({ length: Math.round(product.rating) }).map(
+                      (_, i) => (
+                        <Star key={i} size={16} fill="#A0785A" stroke="none" />
+                      )
+                    )}
+                  </div>
+                  <Button
+                    className="mt-3 w-full bg-[#2E8B57] hover:bg-[#00693E]"
+                    onClick={() => addToCart(product)}
+                  >
+                    Add to Cart <ShoppingCart className="ml-2" size={16} />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
         {/* Shipping Promo */}
         <div className="mt-10 p-6 bg-[#355E3B] text-[#E3DAC9] rounded-xl text-center">
-          <h2 className="text-2xl font-bold">🚚 Free Shipping on orders over $50!</h2>
+          <h2 className="text-2xl font-bold">
+            🚚 Free Shipping on orders over $50!
+          </h2>
           <p className="mt-2 text-sm flex items-center justify-center gap-2">
-            <Truck size={20} /> Order now and receive it within 3-5 business days.
+            <Truck size={20} /> Order now and receive it within 3-5 business
+            days.
           </p>
         </div>
       </div>

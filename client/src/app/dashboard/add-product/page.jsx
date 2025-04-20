@@ -54,15 +54,20 @@ export default function AddProductPage() {
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...newPreviews]);
 
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ...files],
-    }));
+    if (form.images) {
+      setForm((prev) => ({
+        ...prev,
+        images: [...prev.images, ...files],
+      }));
+    }
   };
 
   useEffect(() => {
     try {
-      setUser(getAuthenticatedUser());
+      getAuthenticatedUser().then((user) => {
+        setUser(user);
+      });
+      console.log(user);
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Failed to fetch user data");
@@ -112,6 +117,8 @@ export default function AddProductPage() {
           images: uploadedImageUrls,
         },
       };
+
+      console.log("Form Payload:", formPayload);
 
       const res = await axios.post("/api/product", formPayload);
       toast.success("Product submitted successfully!");

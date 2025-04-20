@@ -51,4 +51,15 @@ export const db = {
     }
   },
 
+  getProducts: async () => {
+    try {
+      await connectToDatabase();
+      const result = await Product.find({}).populate("owner");
+      // new User({...}) + save = create
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 };
