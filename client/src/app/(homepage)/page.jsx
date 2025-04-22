@@ -12,28 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Home,
-  Heart,
-  User,
-  MapPin,
-  Calendar,
-  Menu,
-  X,
-  ArrowRight,
-  AlertTriangle,
-  Search,
-  ShoppingBag,
-  Utensils,
-  PawPrint,
-  MessageCircle,
-  Users,
-} from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { Home, Heart, Calendar, ArrowRight, PawPrint } from "lucide-react";
 
 export default function HomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const emergencyServices = [
     {
       id: 1,
