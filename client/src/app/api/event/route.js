@@ -7,9 +7,7 @@ connectToDatabase();
 
 export async function GET(request) {
   try {
-    const upcomingEvents = await Event.find({ eventDate: { $gt: Date.now() } })
-      .sort({ eventDate: 1 })
-      .lean();
+    const upcomingEvents = await Event.find().sort({ eventDate: 1 }).lean();
     return NextResponse.json({
       success: true,
       message: "Events fetched successfully",

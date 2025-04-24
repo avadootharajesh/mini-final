@@ -8,11 +8,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { getUserByToken, getToken } from "@/../actions/userActions";
+import { Loader2 } from "lucide-react";
 
 function CommunityInteriorPage() {
   const params = useParams();
   const communityId = params.id;
 
+  const [communityName, setCommunityName] = useState("");
   const [posts, setPosts] = useState([]);
   const [commentsMap, setCommentsMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,9 @@ function CommunityInteriorPage() {
 
       if (data.success) {
         setPosts(data.posts || []);
+        if (data.communityName) {
+          setCommunityName(data.communityName);
+        }
 
         if (data.posts && data.posts.length > 0) {
           for (const post of data.posts) {
@@ -110,9 +115,14 @@ function CommunityInteriorPage() {
     }
 
     try {
+      // Make sure to include the image in the postData
       const response = await axios.post("/api/post", {
         communityId,
-        postData,
+        postData: {
+          title: postData.title,
+          content: postData.content,
+          image: postData.image || "", // Ensure image URL is included
+        },
         token,
       });
       const data = response.data;
@@ -175,20 +185,36 @@ function CommunityInteriorPage() {
 
   if (loading) {
     return (
-      <div className="p-4 text-center">
-        <div className="animate-pulse">Loading posts...</div>
+      <div className="p-8 text-center">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-gray-600 font-medium">Loading content...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
+      {communityName && (
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-primary titlefont">
+            {communityName}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Join the discussion and share your thoughts!
+          </p>
+        </div>
+      )}
+
       {isLoggedIn ? (
         <PostForm onSubmit={handleCreatePost} />
       ) : (
-        <Alert className="mb-8 border-[#dc2446] bg-white">
-          <AlertDescription className="text-black">
-            Login to create posts and participate in discussions!
+        <Alert className="mb-8 border-[#dc2446] border-2 bg-white/90 shadow-sm">
+          <AlertDescription className="text-black flex items-center justify-between py-2">
+            <span className="font-medium">
+              Login to create posts and participate in discussions!
+            </span>
           </AlertDescription>
         </Alert>
       )}
@@ -211,10 +237,16 @@ function CommunityInteriorPage() {
             />
           ))
         ) : (
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md overflow-hidden">
             <CardContent className="flex flex-col items-center justify-center p-12">
-              <p className="text-lg text-gray-500">
-                No posts in this community yet. Be the first to create one!
+              <div className="rounded-full bg-primary/10 p-4 mb-4">
+                <MessageSquare className="h-12 w-12 text-primary" />
+              </div>
+              <p className="text-xl font-medium text-gray-700 mb-2">
+                No posts in this community yet
+              </p>
+              <p className="text-gray-500 text-center">
+                Be the first to create a post and start the conversation!
               </p>
             </CardContent>
           </Card>
