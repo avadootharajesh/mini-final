@@ -48,7 +48,7 @@ export default function EventsPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Upcoming Events</h1>
+        <h1 className="text-3xl font-bold">Latest Events</h1>
 
         <Link href="/events/create">
           <Button className="bg-blue-600 hover:bg-blue-700">

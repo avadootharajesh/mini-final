@@ -141,6 +141,7 @@ const EventForm = () => {
               className="w-full p-2 border rounded focus:ring focus:ring-blue-200 focus:outline-none"
               rows="3"></textarea>
           </div>
+          <label className="block mb-1 font-medium">Event Image</label>
 
           <ImageUploader
             image={eventData.image}

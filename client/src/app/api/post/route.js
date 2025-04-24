@@ -11,6 +11,8 @@ connectToDatabase();
 export async function POST(request) {
   try {
     const { communityId, postData, token } = await request.json();
+    console.log("Image received:", postData.image);
+
     if (!token || !postData || !communityId) {
       return NextResponse.json(
         {
@@ -20,6 +22,7 @@ export async function POST(request) {
         { status: 401 }
       );
     }
+
     const response = await getUserByToken(token, "user");
     if (!response.success) {
       return NextResponse.json(
@@ -38,17 +41,26 @@ export async function POST(request) {
     }
     const date = new Date();
 
-    const post = new CommunityPost({
+    // Create a post object with all fields explicitly set
+    const postObject = {
       title: postData.title,
       content: postData.content,
       author: user._id.toString(),
+      image: postData.image,
       community: communityId.toString(),
       commentCount: 0,
-      createdAt: date.toISOString(),
-      updatedAt: date.toISOString(),
-    });
+      createdAt: date,
+      updatedAt: date,
+    };
 
+    console.log("About to save post with data:", postObject);
+
+    const post = new CommunityPost(postObject);
+    post.image = postData.image;
     await post.save();
+
+    // Log the saved post document
+    console.log("Post after save:", post.toObject());
 
     return NextResponse.json({
       success: true,
@@ -57,12 +69,13 @@ export async function POST(request) {
         _id: post._id.toString(),
         title: post.title,
         content: post.content,
+        image: post.image,
         author: {
           _id: user._id.toString(),
           name: user.name,
         },
         commentCount: 0,
-        createdAt: post.createdAt.toISOString(),
+        createdAt: post.createdAt,
       },
     });
   } catch (err) {
@@ -86,15 +99,19 @@ export async function GET(request) {
         { status: 400 }
       );
     }
+    const community = await Community.findById(communityId).lean();
 
+    // Make sure to select the image field
     const posts = await CommunityPost.find({ community: communityId })
-      .populate("author", "name email -_id")
+      .populate("author", "name email profilePicture")
       .sort({ createdAt: -1 })
       .lean();
-    console.log(posts);
+
+    // This should now include the image field for each post
     return NextResponse.json({
       success: true,
       posts,
+      communityName: community.name,
     });
   } catch (err) {
     console.error("Error getting posts:", err);

@@ -103,8 +103,7 @@ export default function StorePage() {
                   console.log("Product clicked:", product);
                   localStorage.setItem("product", JSON.stringify(product));
                   router.push(`/store/product`);
-                }}
-              >
+                }}>
                 <img
                   src={product.images[0]}
                   alt={product.name}
@@ -126,8 +125,7 @@ export default function StorePage() {
                   </div>
                   <Button
                     className="mt-3 w-full bg-[#2E8B57] hover:bg-[#00693E]"
-                    onClick={() => addToCart(product)}
-                  >
+                    onClick={() => addToCart(product)}>
                     Add to Cart <ShoppingCart className="ml-2" size={16} />
                   </Button>
                 </CardContent>

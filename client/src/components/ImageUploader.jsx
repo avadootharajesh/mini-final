@@ -5,7 +5,6 @@ import { CldUploadWidget } from "next-cloudinary";
 const ImageUploader = ({ image, onUploadSuccess, onUploadError }) => {
   return (
     <div>
-      <label className="block mb-1 font-medium">Event Image</label>
       <div className="mb-2">
         <CldUploadWidget
           uploadPreset="Furrever"
@@ -20,7 +19,7 @@ const ImageUploader = ({ image, onUploadSuccess, onUploadError }) => {
             <button
               type="button"
               onClick={() => open()}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+              className="px-4 py-2 bg-[#788553] rounded-lg text-white transition">
               {image ? "Change Image" : "Upload Image"}
             </button>
           )}
