@@ -8,13 +8,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { getUserByToken, getToken } from "@/../actions/userActions";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageSquare, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function CommunityInteriorPage() {
   const params = useParams();
   const communityId = params.id;
+  const router = useRouter();
 
   const [communityName, setCommunityName] = useState("");
+  const [communityDescription, setCommunityDescription] = useState("");
   const [posts, setPosts] = useState([]);
   const [commentsMap, setCommentsMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -64,6 +67,9 @@ function CommunityInteriorPage() {
         setPosts(data.posts || []);
         if (data.communityName) {
           setCommunityName(data.communityName);
+        }
+        if (data.communityDescription) {
+          setCommunityDescription(data.communityDescription);
         }
 
         if (data.posts && data.posts.length > 0) {
@@ -115,13 +121,12 @@ function CommunityInteriorPage() {
     }
 
     try {
-      // Make sure to include the image in the postData
       const response = await axios.post("/api/post", {
         communityId,
         postData: {
           title: postData.title,
           content: postData.content,
-          image: postData.image || "", // Ensure image URL is included
+          image: postData.image || "",
         },
         token,
       });
@@ -185,71 +190,86 @@ function CommunityInteriorPage() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-gray-600 font-medium">Loading content...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
+        <p className="text-secondary">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {communityName && (
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-primary titlefont">
+    <div className="flex flex-col min-h-screen pb-16 md:pb-0">
+      {/* Community Header */}
+      <div className="px-4 py-3 border-b sticky top-0 bg-white z-10 md:hidden">
+        <div className="flex items-center">
+          <button onClick={() => router.back()} className="mr-3 text-primary">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-semibold text-primary">
             {communityName}
           </h1>
-          <p className="text-gray-600 mt-1">
-            Join the discussion and share your thoughts!
-          </p>
         </div>
-      )}
+      </div>
 
-      {isLoggedIn ? (
-        <PostForm onSubmit={handleCreatePost} />
-      ) : (
-        <Alert className="mb-8 border-[#dc2446] border-2 bg-white/90 shadow-sm">
-          <AlertDescription className="text-black flex items-center justify-between py-2">
-            <span className="font-medium">
-              Login to create posts and participate in discussions!
-            </span>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Community Info (Desktop) */}
+      <div className="hidden md:block py-6 px-4 border-b">
+        <h1 className="text-2xl font-bold text-primary">{communityName}</h1>
+        {communityDescription && (
+          <p className="text-secondary mt-1">{communityDescription}</p>
+        )}
+        <p className="text-sm text-secondary mt-2">
+          Join the discussion and share your thoughts!
+        </p>
+      </div>
 
-      <div className="space-y-6">
+      {/* Create Post Form */}
+      <div className="px-4 py-3">
+        {isLoggedIn ? (
+          <div className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <PostForm onSubmit={handleCreatePost} />
+          </div>
+        ) : (
+          <Alert className="mb-4 border-accent border bg-white/90 rounded-xl">
+            <AlertDescription className="text-primary flex items-center justify-between py-2">
+              <span className="font-medium">
+                Login to create posts and join discussions
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+
+      {/* Posts Feed */}
+      <div className="px-4 divide-y">
         {Array.isArray(posts) && posts.length > 0 ? (
           posts.map((post) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              comments={commentsMap[post._id] || []}
-              commentCount={post.commentCount}
-              onComment={handleComment}
-              isCommenting={activePostId === post._id}
-              onCancelComment={handleCancelComment}
-              onSubmitComment={(commentText) =>
-                handleSubmitComment(post._id, commentText)
-              }
-              currentUser={user}
-            />
+            <div key={post._id} className="py-4">
+              <PostCard
+                post={post}
+                comments={commentsMap[post._id] || []}
+                commentCount={post.commentCount}
+                onComment={handleComment}
+                isCommenting={activePostId === post._id}
+                onCancelComment={handleCancelComment}
+                onSubmitComment={(commentText) =>
+                  handleSubmitComment(post._id, commentText)
+                }
+                currentUser={user}
+              />
+            </div>
           ))
         ) : (
-          <Card className="bg-white shadow-md overflow-hidden">
-            <CardContent className="flex flex-col items-center justify-center p-12">
-              <div className="rounded-full bg-primary/10 p-4 mb-4">
-                <MessageSquare className="h-12 w-12 text-primary" />
-              </div>
-              <p className="text-xl font-medium text-gray-700 mb-2">
-                No posts in this community yet
-              </p>
-              <p className="text-gray-500 text-center">
-                Be the first to create a post and start the conversation!
-              </p>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full bg-primary/10 p-4 mb-4">
+              <MessageSquare className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg font-medium text-primary mb-2">
+              No posts yet
+            </p>
+            <p className="text-secondary max-w-xs mx-auto">
+              Be the first to start a conversation in this community!
+            </p>
+          </div>
         )}
       </div>
     </div>
