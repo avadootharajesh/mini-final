@@ -1,7 +1,7 @@
 /* Layout for the main container that holds conversations and messages */
 .conversations-with-messages {
   display: flex;
-  height: 100vh; /* Make container full height */
+  height: 95vh; /* Make container full height */
   width: 100vw; /* Make container full width */
   overflow: hidden; /* Prevent scrolling on the main container */
 }

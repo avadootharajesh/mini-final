@@ -143,91 +143,99 @@ export default function CommunityLayout({ children }) {
 
       <div className="flex flex-grow">
         {/* Left sidebar - only visible on desktop */}
-        <div className="hidden md:flex flex-col w-64 border-r p-4 h-screen sticky top-0">
-          <h1 className="text-xl font-bold text-primary mb-6">Communities</h1>
+        <div className="hidden md:flex flex-col w-64 border-r h-screen sticky top-0 bg-white">
+          <div className="flex flex-col h-full">
+            <div className="p-4">
+              <h1 className="text-xl font-bold text-primary mb-6">
+                Communities
+              </h1>
 
-          <div className="flex flex-col space-y-6 mb-8">
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center text-primary hover:text-accent">
-              <Home className="w-5 h-5 mr-2" />
-              <span>Home</span>
-            </button>
-            <button
-              onClick={() => router.push("/search")}
-              className="flex items-center text-primary hover:text-accent">
-              <Search className="w-5 h-5 mr-2" />
-              <span>Search</span>
-            </button>
-            <button
-              onClick={() => router.push("/communities")}
-              className="flex items-center text-accent font-medium">
-              <Compass className="w-5 h-5 mr-2" />
-              <span>Communities</span>
-            </button>
-            <button
-              onClick={() => router.push("/settings")}
-              className="flex items-center text-primary hover:text-accent">
-              <Settings className="w-5 h-5 mr-2" />
-              <span>Settings</span>
-            </button>
-          </div>
+              <div className="flex flex-col space-y-6 mb-8">
+                <button
+                  onClick={() => router.push("/")}
+                  className="flex items-center text-primary hover:text-accent">
+                  <Home className="w-5 h-5 mr-2" />
+                  <span>Home</span>
+                </button>
+                <button
+                  onClick={() => router.push("/")}
+                  className="flex items-center text-primary hover:text-accent">
+                  <Search className="w-5 h-5 mr-2" />
+                  <span>Search</span>
+                </button>
+                <button
+                  onClick={() => router.push("/community")}
+                  className="flex items-center text-accent font-medium">
+                  <Compass className="w-5 h-5 mr-2" />
+                  <span>Communities</span>
+                </button>
+                <button
+                  onClick={() => router.push("/profile")}
+                  className="flex items-center text-primary hover:text-accent">
+                  <Settings className="w-5 h-5 mr-2" />
+                  <span>Settings</span>
+                </button>
+              </div>
 
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-sm font-semibold text-secondary">
-              YOUR COMMUNITIES
-            </h2>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="text-accent hover:text-accent/80">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-sm font-semibold text-secondary">
+                  YOUR COMMUNITIES
+                </h2>
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="text-accent hover:text-accent/80">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-          <div className="overflow-y-auto flex-grow">
-            {communities.length > 0 ? (
-              communities.map((community) => (
-                <div
-                  key={community._id}
-                  onClick={() => router.push(`/community/${community._id}`)}
-                  className="flex items-center py-3 hover:bg-gray-50 cursor-pointer rounded-md transition-colors px-2">
-                  <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent mr-3">
-                    {community.name.charAt(0).toUpperCase()}
+            {/* Scrollable communities list */}
+            <div className="overflow-y-auto flex-grow px-4 pb-20">
+              {communities.length > 0 ? (
+                communities.map((community) => (
+                  <div
+                    key={community._id}
+                    onClick={() => router.push(`/community/${community._id}`)}
+                    className="flex items-center py-3 hover:bg-gray-50 cursor-pointer rounded-md transition-colors px-2">
+                    <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent mr-3">
+                      {community.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden">
+                      <h3 className="font-medium text-primary truncate">
+                        {community.name}
+                      </h3>
+                      <p className="text-xs text-secondary truncate">
+                        {community.admin?.name || "Unknown"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="overflow-hidden">
-                    <h3 className="font-medium text-primary truncate">
-                      {community.name}
-                    </h3>
+                ))
+              ) : (
+                <div className="py-4 text-center text-secondary">
+                  <p>No communities found</p>
+                </div>
+              )}
+            </div>
+
+            {/* Fixed profile section at bottom */}
+            {isLoggedIn && (
+              <div className="p-4 border-t fixed w-64 border border-r-1 bottom-0 left-0 right-0 bg-white">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
+                    {user?.name?.charAt(0) || "U"}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary truncate">
+                      {user?.name || "User"}
+                    </p>
                     <p className="text-xs text-secondary truncate">
-                      {community.admin?.name || "Unknown"}
+                      {user?.email || "Email"}
                     </p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="py-4 text-center text-secondary">
-                <p>No communities found</p>
               </div>
             )}
           </div>
-
-          {isLoggedIn && (
-            <div className="mt-auto pt-4 border-t">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
-                  {user?.name?.charAt(0) || "U"}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-primary truncate">
-                    {user?.name || "User"}
-                  </p>
-                  <p className="text-xs text-secondary truncate">
-                    @{user?.username || "username"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Main content */}
@@ -239,13 +247,11 @@ export default function CommunityLayout({ children }) {
         <button onClick={() => router.push("/")} className="text-primary p-1">
           <Home className="w-6 h-6" />
         </button>
-        <button
-          onClick={() => router.push("/search")}
-          className="text-primary p-1">
+        <button onClick={() => router.push("/")} className="text-primary p-1">
           <Search className="w-6 h-6" />
         </button>
         <button
-          onClick={() => router.push("/communities")}
+          onClick={() => router.push("/community")}
           className="text-accent p-1">
           <Compass className="w-6 h-6" />
         </button>
