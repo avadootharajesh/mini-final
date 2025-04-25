@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { PawPrint, Mail, Calendar, Loader2 } from "lucide-react";
+import { PawPrint, Mail, Calendar, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -20,6 +21,7 @@ export default function ProfilePage() {
     profilePicture: ""
   });
   const [updating, setUpdating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -107,6 +109,11 @@ export default function ProfilePage() {
     if (num === 0) return "/default-avatar.svg";    // Fun emoji style
     if (num === 1) return "/default-avatar-2.svg";  // Adventurer style
     return "/default-avatar-3.svg";                 // Bottts style (robot)
+  };
+
+  const handleLogout = () => {
+    // You could add any logout logic here (clearing tokens, etc.)
+    router.push("/login");
   };
 
   if (loading) {
@@ -213,7 +220,14 @@ export default function ProfilePage() {
                         {user.bio || "No bio provided yet."}
                       </p>
                     </div>
-                    <div className="flex justify-end pt-4">
+                    <div className="flex justify-end gap-3 pt-4">
+                      <Button 
+                        variant="destructive" 
+                        onClick={handleLogout}
+                        className="flex items-center gap-2"
+                      >
+                        <LogOut size={16} /> Logout
+                      </Button>
                       <Button onClick={() => setIsEditing(true)}>
                         Edit Profile
                       </Button>

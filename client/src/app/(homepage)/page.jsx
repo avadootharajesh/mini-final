@@ -21,7 +21,7 @@ export default function HomePage() {
       name: "Injury Reporting",
       description: "Report injured street animals for immediate assistance",
       image:
-        "https://images.unsplash.com/photo-1591160690555-5debfba289f0?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D",
+        "https://static.vecteezy.com/system/resources/previews/009/792/159/non_2x/veterinarian-putting-a-bandage-on-injured-dog-s-paw-free-vector.jpg",
     },
     {
       id: 2,

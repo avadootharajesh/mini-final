@@ -81,25 +81,10 @@ export default function StorePage() {
   }, []);
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-secondary">
-      {/* Navigation Bar */}
-      <nav className="bg-primary text-white p-4 shadow-md flex justify-between items-center">
-        <h1 className="text-2xl font-bold titlefont">The Pet Store 🛍️</h1>
-        <div className="flex gap-4">
-          <Button variant="ghost" className="text-white hover:bg-primary/80">
-            <Home className="mr-2" size={16} /> Home
-          </Button>
-          <Button variant="ghost" className="text-white hover:bg-primary/80">
-            <ShoppingCart className="mr-2" size={16} /> Cart ({cart.length})
-          </Button>
-          <Button variant="ghost" className="text-white hover:bg-primary/80">
-            <CreditCard className="mr-2" size={16} /> Checkout
-=======
-    <div className="min-h-screen bg-[#E3DAC9]">
       {/* Navbar */}
-      <nav className="bg-[#355E3B] text-[#E3DAC9] p-4 shadow-md flex justify-between items-center relative">
-        <h1 className="text-2xl font-bold">The Cozy Store 🍭️</h1>
+      <nav className="bg-primary text-white p-4 shadow-md flex justify-between items-center relative">
+        <h1 className="text-2xl font-bold titlefont">The Pet Store 🛍️</h1>
         <div className="flex items-center gap-4">
           <div className="relative">
             <input
@@ -126,27 +111,30 @@ export default function StorePage() {
           </div>
           <Button
             variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
+            className="text-white hover:bg-primary/80"
             onClick={() => router.push("/dashboard")}
           >
             <Home className="mr-2" size={16} /> Home
           </Button>
           <Button
             variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
+            className="text-white hover:bg-primary/80"
             onClick={() => router.push("/store/cart")}
           >
             <ShoppingCart className="mr-2" size={16} /> Cart ({cartSize})
           </Button>
           <Button
             variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
+            className="text-white hover:bg-primary/80"
             onClick={() => router.push("/store/orders")}
           >
             <CreditCard className="mr-2" size={16} /> Orders
->>>>>>> 441992b (payment+search)
           </Button>
-          <Button variant="ghost" className="text-white hover:bg-primary/80">
+          <Button 
+            variant="ghost" 
+            className="text-white hover:bg-primary/80"
+            onClick={() => router.push("/login")}
+          >
             <LogOut className="mr-2" size={16} /> Logout
           </Button>
         </div>
@@ -173,33 +161,16 @@ export default function StorePage() {
                   <CardTitle className="text-lg font-semibold text-primary">
                     {product.name}
                   </CardTitle>
-<<<<<<< HEAD
-                  <p className="text-secondary font-bold text-lg">
-                    {product.price}
-                  </p>
+                  <p className="text-secondary font-bold text-lg">₹{product.price}</p>
                   <div className="flex items-center gap-1 text-accent">
-                    {Array.from({ length: Math.round(product.rating) }).map(
-                      (_, i) => (
-                        <Star key={i} size={16} fill="#b59e7e" stroke="none" />
-                      )
-                    )}
-                  </div>
-                  <Button
-                    className="mt-3 w-full bg-primary hover:bg-primary/90 text-white"
-                    onClick={() => addToCart(product)}>
-                    Add to Cart <ShoppingCart className="ml-2" size={16} />
-                  </Button>
-=======
-                  <p className="text-[#00693E] font-bold text-lg">₹{product.price}</p>
-                  <div className="flex items-center gap-1 text-[#2E8B57]">
                     {Array.from({ length: Math.round(product.rating) }).map((_, i) => (
-                      <Star key={i} size={16} fill="#A0785A" stroke="none" />
+                      <Star key={i} size={16} fill="#b59e7e" stroke="none" />
                     ))}
                   </div>
 
                   <div className="flex flex-col items-center justify-center gap-2 mt-4 w-full">
                     <Button
-                      className="w-full bg-[#2E8B57] hover:bg-[#00693E]"
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         addToCart(product._id);
@@ -208,7 +179,7 @@ export default function StorePage() {
                       Add to Cart <ShoppingCart className="ml-2" size={16} />
                     </Button>
                     <Button
-                      className="w-full bg-[#00693E] hover:bg-[#004d2c] text-white"
+                      className="w-full bg-accent hover:bg-accent/90 text-primary"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleBuyNow(product);
@@ -217,28 +188,16 @@ export default function StorePage() {
                       Buy Now
                     </Button>
                   </div>
->>>>>>> 441992b (payment+search)
                 </CardContent>
               </Card>
             ))}
         </div>
 
-<<<<<<< HEAD
-        {/* Shipping Promo */}
-        <div className="mt-10 p-6 bg-accent/80 text-primary rounded-xl text-center shadow-md">
-          <h2 className="text-2xl font-bold titlefont">
-            🚚 Free Shipping on orders over $50!
-          </h2>
-          <p className="mt-2 text-sm flex items-center justify-center gap-2 text-primary/80">
-            <Truck size={20} /> Order now and receive it within 3-5 business
-            days.
-=======
         {/* Promo */}
-        <div className="mt-10 p-6 bg-[#355E3B] text-[#E3DAC9] rounded-xl text-center">
-          <h2 className="text-2xl font-bold">🚚 Free Shipping on orders over ₹50!</h2>
-          <p className="mt-2 text-sm flex items-center justify-center gap-2">
+        <div className="mt-10 p-6 bg-accent/80 text-primary rounded-xl text-center shadow-md">
+          <h2 className="text-2xl font-bold titlefont">🚚 Free Shipping on orders over ₹50!</h2>
+          <p className="mt-2 text-sm flex items-center justify-center gap-2 text-primary/80">
             <Truck size={20} /> Order now and receive it within 3-5 business days.
->>>>>>> 441992b (payment+search)
           </p>
         </div>
       </div>

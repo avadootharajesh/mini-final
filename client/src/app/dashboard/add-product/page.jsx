@@ -155,7 +155,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F3F3]">
+    <div className="min-h-screen bg-secondary">
       {/* Navbar */}
 
       {loading && (
@@ -167,19 +167,20 @@ export default function AddProductPage() {
         </div>
       )}
 
-      <nav className="flex justify-between items-center bg-[#355E3B] text-white p-4 shadow-md">
-        <h1 className="text-xl font-bold">Add Product</h1>
+      <nav className="flex justify-between items-center bg-primary text-white p-4 shadow-md">
+        <h1 className="text-xl font-bold titlefont">Add Product</h1>
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
-            <Button variant="ghost" className="text-white hover:text-[#E3DAC9]">
-              Home
+            <Button variant="ghost" className="text-white hover:bg-primary/80">
+              Dashboard
             </Button>
           </Link>
           <Button
             variant="ghost"
-            className="text-white hover:text-[#E3DAC9]"
+            className="text-white hover:bg-primary/80"
             onClick={() => {
               logout();
+              router.push("/login");
               toast.success("Logout successful");
             }}
           >
@@ -194,11 +195,11 @@ export default function AddProductPage() {
 
       {/* Product Form */}
       <div className="p-6">
-        <Card className="max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle>Add New Product</CardTitle>
+        <Card className="max-w-3xl mx-auto shadow-lg">
+          <CardHeader className="border-b">
+            <CardTitle className="text-primary">Add New Product</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form
               onSubmit={handleSubmit}
               className="space-y-4"
@@ -250,34 +251,46 @@ export default function AddProductPage() {
                 onChange={handleChange}
               />
 
-              {/* Image upload */}
               <div>
-                <label className="block mb-1 font-medium">
-                  Upload Images (max 10)
-                </label>
+                <p className="mb-2 font-medium text-sm text-secondary">Product Images (up to 10)</p>
                 <Input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
+                  className="bg-white"
                 />
-                {previewUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3 mt-3">
-                    {previewUrls.map((url, idx) => (
-                      <img
-                        key={idx}
-                        src={url}
-                        alt={`preview-${idx}`}
-                        className="w-full h-32 object-cover rounded shadow"
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 text-white">
-                Submit Product
-              </Button>
+              {previewUrls.length > 0 && (
+                <div className="mt-4">
+                  <p className="mb-2 font-medium text-sm text-secondary">Image Previews</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {previewUrls.map((url, index) => (
+                      <div
+                        key={index}
+                        className="relative h-24 border rounded overflow-hidden"
+                      >
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4">
+                <Button
+                  type="submit"
+                  className="bg-primary text-white hover:bg-primary/90"
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Add Product"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>

@@ -32,6 +32,7 @@ import {
   Users,
   PackagePlus,
   LogOut,
+  PlusCircle,
 } from "lucide-react";
 import { logout } from "@/lib/userutils";
 
@@ -42,26 +43,25 @@ export default function SellerDashboard() {
   const [products, setProducts] = useState([]);
 
   return (
-    <div className="flex min-h-screen bg-[#E3DAC9]">
+    <div className="flex min-h-screen bg-secondary">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#A0785A] text-white p-5 hidden md:block">
-        <h2 className="text-2xl font-bold text-center">Seller Dashboard</h2>
-        <Separator className="my-4 bg-white" />
+      <aside className="w-64 bg-primary text-white p-5 hidden md:block">
+        <h2 className="text-2xl font-bold text-center titlefont">Seller Dashboard</h2>
+        <Separator className="my-4 bg-white/30" />
         <ul className="space-y-4">
-          <li className="flex items-center gap-2 cursor-pointer">
+          <li className="flex items-center gap-2 cursor-pointer hover:text-accent transition-colors duration-200 p-2 rounded-md">
             <Users className="w-5 h-5" /> Customer Requests
           </li>
-          <li className="flex items-center gap-2 cursor-pointer">
+          <li className="flex items-center gap-2 cursor-pointer hover:text-accent transition-colors duration-200 p-2 rounded-md">
             <ShoppingCart className="w-5 h-5" /> Orders & Sales
           </li>
-          <li className="flex items-center gap-2 cursor-pointer"
-            onClick={() => {
-              router.push("/dashboard/add-product");
-            }}
+          <li 
+            className="flex items-center gap-2 cursor-pointer hover:text-accent transition-colors duration-200 p-2 rounded-md"
+            onClick={() => router.push("/dashboard/add-product")}
           >
             <PackagePlus className="w-5 h-5" /> Add Product
           </li>
-          <li className="flex items-center gap-2 cursor-pointer">
+          <li className="flex items-center gap-2 cursor-pointer hover:text-accent transition-colors duration-200 p-2 rounded-md">
             <BarChart className="w-5 h-5" /> Analytics
           </li>
         </ul>
@@ -70,9 +70,16 @@ export default function SellerDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-6">
         {/* Navbar */}
-        <nav className="flex justify-between items-center bg-[#355E3B] text-white p-4 rounded-lg shadow-md">
-          <h1 className="text-xl font-bold">Seller Dashboard</h1>
+        <nav className="flex justify-between items-center bg-primary text-white p-4 rounded-lg shadow-md">
+          <h1 className="text-xl font-bold titlefont">Seller Dashboard</h1>
           <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 bg-accent text-primary hover:bg-accent/90"
+              onClick={() => router.push("/dashboard/add-product")}
+            >
+              <PlusCircle className="w-4 h-4" /> Add Product
+            </Button>
             <Avatar>
               <AvatarImage src="/profile.jpg" alt="Profile" />
               <AvatarFallback>JD</AvatarFallback>
@@ -82,9 +89,8 @@ export default function SellerDashboard() {
               className="flex items-center gap-2"
               onClick={() => {
                 logout();
-                toast.success("Logout successful", {
-                  
-                });
+                router.push("/login");
+                toast.success("Logout successful");
               }}
             >
               <LogOut className="w-4 h-4" /> Logout
@@ -94,7 +100,7 @@ export default function SellerDashboard() {
 
         {/* Tabs for Dashboard Sections */}
         <Tabs defaultValue="products" className="mt-6">
-          <TabsList className="bg-[#00693E] text-white space-x-3 transition-all duration-300">
+          <TabsList className="bg-primary text-white space-x-3 transition-all duration-300">
             <TabsTrigger value="products">Your Products</TabsTrigger>
             <TabsTrigger value="requests">Customer Requests</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -104,10 +110,19 @@ export default function SellerDashboard() {
           <TabsContent value="products">
             <Card>
               <CardHeader>
-                <CardTitle>Your Products</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Your Products</CardTitle>
+                  <Button
+                    variant="outline" 
+                    className="flex items-center gap-2 bg-primary text-white hover:bg-primary/90"
+                    onClick={() => router.push("/dashboard/add-product")}
+                  >
+                    <PlusCircle className="w-4 h-4" /> Add New Product
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   List of all your uploaded products.
                 </p>
                 {/* Product List Goes Here */}
@@ -122,7 +137,7 @@ export default function SellerDashboard() {
                 <CardTitle>Customer Requests</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Manage customer inquiries & requests.
                 </p>
               </CardContent>
@@ -136,7 +151,7 @@ export default function SellerDashboard() {
                 <CardTitle>Sales Analytics</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">View your sales performance.</p>
+                <p className="text-muted-foreground">View your sales performance.</p>
               </CardContent>
             </Card>
           </TabsContent>

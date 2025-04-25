@@ -6,6 +6,7 @@ const nextConfig = {
       "source.unsplash.com",
       "images.unsplash.com",
       "static.independent.co.uk",
+      "static.vecteezy.com",
     ],
   },
 };
