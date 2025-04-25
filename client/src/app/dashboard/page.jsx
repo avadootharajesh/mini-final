@@ -7,16 +7,20 @@ import UserDashboard from "./userDashboard";
 const page = () => {
   const [user, setUser] = useState(null);
   useEffect(() => {
-    const fetchUser = () => {
-      getAuthenticatedUser().then((user) => {
-        setUser(user);
-        console.log(user);
-      });
+    const fetchUser = async () => {
+      const authenticatedUser = await getAuthenticatedUser();
+      setUser(authenticatedUser);
     };
     fetchUser();
   }, []);
   return (
-    <>{user.userType === "seller" ? <SellerDashboard /> : <UserDashboard />}</>
+    <>
+      {!user || user.userType === "seller" ? (
+        <SellerDashboard />
+      ) : (
+        <UserDashboard />
+      )}
+    </>
   );
 };
 

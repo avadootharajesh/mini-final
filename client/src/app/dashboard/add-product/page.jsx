@@ -11,6 +11,7 @@ import { logout } from "@/lib/userutils";
 import Link from "next/link";
 import { getAuthenticatedUser } from "../../../../actions/loginActions";
 import axios from "axios";
+import ImageUploader from "@/components/ImageUploader"; // Assuming this is the correct path
 
 export default function AddProductPage() {
   const [form, setForm] = useState({
@@ -23,13 +24,10 @@ export default function AddProductPage() {
     images: [],
   });
 
-  const [images, setImages] = useState([]); // files
-  const [previewUrls, setPreviewUrls] = useState([]); // preview
-
+  const [images, setImages] = useState([]); // stores uploaded images as URLs
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [user, setUser] = useState(null);
   const router = useRouter();
 
@@ -40,26 +38,15 @@ export default function AddProductPage() {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length + images.length > 10) {
-      toast.error("You can upload up to 10 images only");
-      return;
-    }
+  // This function handles the successful upload of images from ImageUploader
+  const handleImageUploadSuccess = (result) => {
+    const uploadedImageUrl = result.info.secure_url;
+    setImages((prev) => [...prev, uploadedImageUrl]); // Add the uploaded image URL to the images array
+  };
 
-    setImages((prev) => [...prev, ...files]);
-
-    console.log(images);
-
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls((prev) => [...prev, ...newPreviews]);
-
-    if (form.images) {
-      setForm((prev) => ({
-        ...prev,
-        images: [...prev.images, ...files],
-      }));
-    }
+  const handleImageUploadError = (error) => {
+    console.error("Error uploading image:", error);
+    toast.error("Image upload failed.");
   };
 
   useEffect(() => {
@@ -67,7 +54,6 @@ export default function AddProductPage() {
       getAuthenticatedUser().then((user) => {
         setUser(user);
       });
-      console.log(user);
     } catch (error) {
       console.error("Error fetching user data:", error);
       toast.error("Failed to fetch user data");
@@ -79,46 +65,15 @@ export default function AddProductPage() {
     setLoading(true);
     e.preventDefault();
 
-    // Step 1: Upload images to Cloudinary
-    let uploadedImageUrls = [];
-
-    try {
-      const readFileAsBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      };
-
-      // Step 1: Upload each image to Cloudinary via your API
-      for (const image of images) {
-        const base64 = await readFileAsBase64(image);
-        const res = await axios.post("/api/product/upload-image", { base64 });
-        uploadedImageUrls.push(res.data.url); // adjust based on your response
-      }
-      toast.success("Images uploaded successfully!");
-    } catch (error) {
-      console.error("Cloudinary Upload Error:", error);
-      toast.error("Failed to upload images");
-      setLoading(false);
-      return;
-    }
-
-    console.log("Uploaded image URLs to Cloudinary:");
-
     // Step 2: Send form + user + image URLs
     try {
       const formPayload = {
         user,
         product: {
           ...form,
-          images: uploadedImageUrls,
+          images, // Include the uploaded images
         },
       };
-
-      console.log("Form Payload:", formPayload);
 
       const res = await axios.post("/api/product", formPayload);
       toast.success("Product submitted successfully!");
@@ -132,24 +87,13 @@ export default function AddProductPage() {
         category: "",
         tags: "",
       });
-      setImages([]);
-      setPreviewUrls([]);
+      setImages([]); // Clear uploaded images
     } catch (error) {
       console.error("Error adding product:", error);
       toast.error("Failed to add product");
       setLoading(false);
       return;
     } finally {
-      setForm({
-        name: "",
-        description: "",
-        price: "",
-        quantity: "",
-        category: "",
-        tags: "",
-      });
-      setImages([]);
-      setPreviewUrls([]);
       setLoading(false);
     }
   };
@@ -157,7 +101,6 @@ export default function AddProductPage() {
   return (
     <div className="min-h-screen bg-secondary">
       {/* Navbar */}
-
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="text-white text-xl font-semibold animate-pulse">
@@ -223,7 +166,7 @@ export default function AddProductPage() {
               <Input
                 type="number"
                 name="price"
-                placeholder="Prize (for 1 nos)"
+                placeholder="Price (for 1 unit)"
                 value={form.price}
                 onChange={handleChange}
                 required
@@ -231,7 +174,7 @@ export default function AddProductPage() {
               <Input
                 type="number"
                 name="quantity"
-                placeholder="Quantity (kg)"
+                placeholder="Quantity (in kg)"
                 value={form.quantity}
                 onChange={handleChange}
                 required
@@ -251,29 +194,31 @@ export default function AddProductPage() {
                 onChange={handleChange}
               />
 
+              {/* Image Upload with ImageUploader */}
               <div>
-                <p className="mb-2 font-medium text-sm text-secondary">Product Images (up to 10)</p>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="bg-white"
+                <label className="block mb-1 font-medium">
+                  Upload Images (max 10)
+                </label>
+                <ImageUploader
+                  image={images[0]} // Only show the first uploaded image as preview
+                  onUploadSuccess={handleImageUploadSuccess}
+                  onUploadError={handleImageUploadError}
                 />
               </div>
 
-              {previewUrls.length > 0 && (
+              {/* Displaying Image Previews */}
+              {images.length > 0 && (
                 <div className="mt-4">
-                  <p className="mb-2 font-medium text-sm text-secondary">Image Previews</p>
+                  <p className="mb-2 font-medium text-sm text-secondary">Uploaded Images</p>
                   <div className="grid grid-cols-3 gap-3">
-                    {previewUrls.map((url, index) => (
+                    {images.map((url, index) => (
                       <div
                         key={index}
                         className="relative h-24 border rounded overflow-hidden"
                       >
                         <img
                           src={url}
-                          alt={`Preview ${index + 1}`}
+                          alt={`Uploaded Image ${index + 1}`}
                           className="h-full w-full object-cover"
                         />
                       </div>

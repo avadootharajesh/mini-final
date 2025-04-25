@@ -42,6 +42,11 @@ export default function SellerDashboard() {
 
   const [products, setProducts] = useState([]);
 
+  useEffect(() => {
+    console.log("useEffect called");
+    
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-secondary">
       {/* Sidebar */}

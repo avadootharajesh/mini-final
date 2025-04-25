@@ -126,7 +126,9 @@ let authenticateUser = null;
 
 export async function getAuthenticatedUser() {
   try {
+    console.log("Fetching authenticated user from cache");
     if (authenticateUser) {
+      console.log("Returning authenticated user from cache");
       return authenticateUser;
     }
     const cookieStore = await cookies();

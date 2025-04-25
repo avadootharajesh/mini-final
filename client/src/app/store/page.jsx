@@ -76,6 +76,7 @@ export default function StorePage() {
     fetchProducts().then(setProducts);
     getAuthenticatedUser().then((currUser) => {
       setUser(currUser);
+      console.log(currUser);
       getCartSize(currUser._id).then(setCartSize);
     });
   }, []);
