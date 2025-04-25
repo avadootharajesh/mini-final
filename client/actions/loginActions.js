@@ -136,13 +136,17 @@ export async function getAuthenticatedUser() {
     // console.log("User token from cookies:", userToken);
 
     if (!userToken && !sellerToken) {
+      console.log("No authentication token found");
       return null;
+      
     }
 
     if (userToken) {
       try {
         const decoded = jwt.verify(userToken, process.env.JWT_USER_SECRET);
         const user = await User.findById(decoded.id).select("-password -__v").lean();
+
+        console.log("User from database:", user);
 
         if (user) {
           authenticateUser = {
@@ -166,6 +170,7 @@ export async function getAuthenticatedUser() {
     if (sellerToken) {
       try {
         const decoded = jwt.verify(sellerToken, process.env.JWT_SELLER_SECRET);
+        console.log("Seller from database:", decoded);
         const seller = await Seller.findById(decoded.id).select(
           "-password -__v"
         ).lean();
