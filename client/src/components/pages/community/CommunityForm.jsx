@@ -19,17 +19,18 @@ export default function CreateCommunityModal({ isOpen, onClose, onSubmit }) {
       open={isOpen}
       onClose={onClose}
       className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen rounded-md items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/40" />
+      <div className="flex min-h-screen items-center justify-center p-4">
+        {/* Replace Dialog.Overlay with a simple div for the backdrop */}
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
-        <div className="relative bg-secondary p-8 w-full max-w-md">
-          <Dialog.Title className="text-2xl font-bold text-primary mb-6">
+        <Dialog.Panel className="relative bg-white dark:bg-black rounded-3xl p-6 w-full max-w-md shadow-lg">
+          <Dialog.Title className="text-xl font-semibold mb-6 text-black dark:text-white">
             Create New Community
           </Dialog.Title>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Community Name
               </label>
               <input
@@ -38,13 +39,14 @@ export default function CreateCommunityModal({ isOpen, onClose, onSubmit }) {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-2 text-black border border-neutral-200 focus:border-black transition-colors"
+                className="w-full px-4 py-3 text-black dark:text-white bg-gray-100 dark:bg-gray-800 border-0 rounded-xl focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:outline-none transition-colors"
+                placeholder="Enter community name"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 Description
               </label>
               <textarea
@@ -52,27 +54,28 @@ export default function CreateCommunityModal({ isOpen, onClose, onSubmit }) {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="w-full px-4 py-2 text-black border border-neutral-200 focus:border-black transition-colors"
+                className="w-full px-4 py-3 text-black dark:text-white bg-gray-100 dark:bg-gray-800 border-0 rounded-xl focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:outline-none transition-colors"
+                placeholder="What's this community about?"
                 rows={4}
                 required
               />
             </div>
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-black transition-colors">
+                className="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium bg-ternary text-white hover:scale-105 transition-transform">
-                Create Community
+                className="px-5 py-2.5 text-sm font-medium bg-black dark:bg-white text-white dark:text-black rounded-full hover:opacity-90 transition-opacity">
+                Create
               </button>
             </div>
           </form>
-        </div>
+        </Dialog.Panel>
       </div>
     </Dialog>
   );
