@@ -49,31 +49,12 @@ const productSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
-    reviews: {
-      type: [
-        {
-          user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-          },
-          rating: {
-            type: Number,
-            required: true,
-            min: 1,
-            max: 5,
-            default: 4,
-          },
-          comment: {
-            type: String,
-            required: true,
-            default: "Comment ---",
-          },
-        },
-      ],
-      //   required: true,
-      default: [],
-    },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -34,7 +34,7 @@ export async function POST(request) {
       price: product.price,
       quantity: product.quantity,
       category: product.category,
-      tags: product.tags,
+      tags: product.tags.split(","),
       owner: userId,
     };
 
