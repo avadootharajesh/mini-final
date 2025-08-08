@@ -9,6 +9,7 @@ const page = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const authenticatedUser = await getAuthenticatedUser();
+      console.log("Authenticated user:", authenticatedUser);
       setUser(authenticatedUser);
     };
     fetchUser();

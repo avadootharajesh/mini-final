@@ -21,6 +21,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import toast from "react-hot-toast";
 
 import useProductStore from "@/lib/zustand";
+import StoreNavbar from "@/components/pages/store/StoreNavbar"; // Import the updated navbar
 
 export default function StorePage() {
   const [cartSize, setCartSize] = useState(0);
@@ -28,6 +29,8 @@ export default function StorePage() {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1); // For tracking focused index in suggestions
 
   const router = useRouter();
 
@@ -45,7 +48,7 @@ export default function StorePage() {
         quantity: 1,
       })
     );
-    useProductStore(state => state.setProducts)(products);
+    useProductStore((state) => state.setProducts)(products);
     router.push("/store/checkout");
   };
 
@@ -60,11 +63,14 @@ export default function StorePage() {
 
     const suggestions = products.filter((product) => {
       const inName = product.name.toLowerCase().includes(query);
-      const inTags = product.tags.some((tag) => tag.toLowerCase().includes(query));
+      const inTags = product.tags.some((tag) =>
+        tag.toLowerCase().includes(query)
+      );
       return inName || inTags;
     });
 
     setFilteredSuggestions(suggestions.slice(0, 5)); // Limit suggestions
+    setFocusedIndex(-1); // Reset focus index when search query changes
   };
 
   const handleSearchSelect = (product) => {
@@ -72,70 +78,75 @@ export default function StorePage() {
     router.push(`/store/product`);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      setFocusedIndex((prevIndex) =>
+        prevIndex < filteredSuggestions.length - 1 ? prevIndex + 1 : prevIndex
+      );
+    } else if (e.key === "ArrowUp") {
+      setFocusedIndex((prevIndex) =>
+        prevIndex > 0 ? prevIndex - 1 : prevIndex
+      );
+    } else if (e.key === "Enter" && focusedIndex >= 0) {
+      handleSearchSelect(filteredSuggestions[focusedIndex]);
+    }
+  };
+
   useEffect(() => {
     fetchProducts().then(setProducts);
     getAuthenticatedUser().then((currUser) => {
       setUser(currUser);
-      console.log(currUser);
-      getCartSize(currUser._id).then(setCartSize);
+      getCartSize(currUser._id).then((size) => {
+        console.log("Cart size:", size);
+        setCartSize(size);
+      });
     });
   }, []);
 
   return (
     <div className="min-h-screen bg-[#E3DAC9]">
       {/* Navbar */}
-      <nav className="bg-[#355E3B] text-[#E3DAC9] p-4 shadow-md flex justify-between items-center relative">
-        <h1 className="text-2xl font-bold">The Cozy Store 🍭️</h1>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="p-2 rounded-md border-none focus:outline-none text-black"
-            />
-            <Search className="absolute top-2 right-2 text-gray-500" size={16} />
-            {filteredSuggestions.length > 0 && (
-              <ul className="absolute top-10 left-0 z-10 bg-white text-black border w-full rounded shadow-md max-h-48 overflow-auto">
-                {filteredSuggestions.map((product) => (
-                  <li
-                    key={product._id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSearchSelect(product)}
-                  >
-                    {product.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/dashboard")}
-          >
-            <Home className="mr-2" size={16} /> Home
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/store/cart")}
-          >
-            <ShoppingCart className="mr-2" size={16} /> Cart ({cartSize})
-          </Button>
-          <Button
-            variant="ghost"
-            className="text-[#E3DAC9] hover:bg-[#2E8B57]"
-            onClick={() => router.push("/store/orders")}
-          >
-            <CreditCard className="mr-2" size={16} /> Orders
-          </Button>
-          <Button variant="ghost" className="text-[#E3DAC9] hover:bg-[#2E8B57]">
-            <LogOut className="mr-2" size={16} /> Logout
-          </Button>
+      <StoreNavbar
+        cartSize={cartSize}
+        setMobileMenuOpen={setMobileMenuOpen}
+        mobileMenuOpen={mobileMenuOpen}
+      />
+
+      {/* Search Bar */}
+      <div className="max-w-6xl mx-auto p-8 relative">
+        <div className="relative flex justify-center mb-6">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyDown} // Add onKeyDown event listener
+            className="p-3 w-full max-w-md rounded-full border-2 border-[#00693E] focus:ring-2 focus:ring-[#2E8B57] focus:outline-none text-black transition-all duration-300"
+          />
+          <Search className="absolute top-3 right-3 text-[#00693E]" size={20} />
         </div>
-      </nav>
+        {/* Search Suggestions */}
+        {filteredSuggestions.length > 0 && (
+          <div className="absolute bg-white border-2 border-[#00693E] rounded-lg shadow-lg w-full max-h-48 overflow-auto z-10">
+            <ul>
+              {filteredSuggestions.map((product, index) => (
+                <li
+                  key={product._id}
+                  className={`p-3 cursor-pointer transition-all duration-200 ${
+                    focusedIndex === index
+                      ? "bg-[#2E8B57] text-white"
+                      : "hover:bg-[#2E8B57] hover:text-white"
+                  }`}
+                  onClick={() => handleSearchSelect(product)}
+                  onMouseEnter={() => setFocusedIndex(index)} // Highlight on hover
+                >
+                  {product.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* Store Products */}
       <div className="max-w-6xl mx-auto p-8">
@@ -159,11 +170,15 @@ export default function StorePage() {
                   <CardTitle className="text-lg font-semibold text-[#00693E]">
                     {product.name}
                   </CardTitle>
-                  <p className="text-[#00693E] font-bold text-lg">₹{product.price}</p>
+                  <p className="text-[#00693E] font-bold text-lg">
+                    ₹{product.price}
+                  </p>
                   <div className="flex items-center gap-1 text-[#2E8B57]">
-                    {Array.from({ length: Math.round(product.rating) }).map((_, i) => (
-                      <Star key={i} size={16} fill="#A0785A" stroke="none" />
-                    ))}
+                    {Array.from({ length: Math.round(product.rating) }).map(
+                      (_, i) => (
+                        <Star key={i} size={16} fill="#A0785A" stroke="none" />
+                      )
+                    )}
                   </div>
 
                   <div className="flex flex-col items-center justify-center gap-2 mt-4 w-full">
@@ -193,9 +208,12 @@ export default function StorePage() {
 
         {/* Promo */}
         <div className="mt-10 p-6 bg-[#355E3B] text-[#E3DAC9] rounded-xl text-center">
-          <h2 className="text-2xl font-bold">🚚 Free Shipping on orders over ₹50!</h2>
+          <h2 className="text-2xl font-bold">
+            🚚 Free Shipping on orders over ₹50!
+          </h2>
           <p className="mt-2 text-sm flex items-center justify-center gap-2">
-            <Truck size={20} /> Order now and receive it within 3-5 business days.
+            <Truck size={20} /> Order now and receive it within 3-5 business
+            days.
           </p>
         </div>
       </div>

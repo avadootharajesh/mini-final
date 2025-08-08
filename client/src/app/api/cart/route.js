@@ -27,7 +27,7 @@ export async function GET(request) {
     // in params
     const userId = request.nextUrl.searchParams.get("userId");
     const result = await db.getCart(userId);
-    // console.log(result.cart);
+    console.log(result);
     const products = [];
     result.cart.forEach((product) => products.push({
         ...product._doc,

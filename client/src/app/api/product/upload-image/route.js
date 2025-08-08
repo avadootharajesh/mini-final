@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { getServerSideProps } from "next/dist/build/templates/pages";
 
 cloudinary.config({
   cloud_name: process.env.ECOMMERCE_CLOUDINARY_CLOUD_NAME ,
@@ -38,3 +39,13 @@ export async function POST(req) {
     );
   }
 }
+
+// serverSideProps
+const props = getServerSideProps({
+  async ({ params }) {
+    return {
+      props: {},
+    };
+  },
+});
+// These props are not used in this file, but are required for the server-side rendering of the page.

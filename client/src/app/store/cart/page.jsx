@@ -23,6 +23,7 @@ export default function CartPage() {
 
   useEffect(() => {
     getAuthenticatedUser().then((user) => {
+      console.log("Authenticated user:", user);
       setUser(user);
       axios
         .get("/api/cart", {

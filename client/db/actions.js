@@ -57,8 +57,10 @@ export const db = {
   getProducts: async () => {
     try {
       await connectToDatabase();
-      const result = await Product.find({}).populate("owner");
+      // + sort ny alphabetical order of name
+      const result = await Product.find({}).populate("owner").sort({ name: 1 });
       // new User({...}) + save = create
+
       return result;
     } catch (error) {
       throw error;
@@ -90,7 +92,9 @@ export const db = {
     try {
       await connectToDatabase();
       const result = await User.findOne({ _id: userId }).populate("cart");
+      // console.log("result cart:", result);
       // new User({...}) + save = create
+      // console.log("result:", result);
       return result;
     } catch (error) {
       throw error;
@@ -102,6 +106,7 @@ export const db = {
       await connectToDatabase();
       const result = await User.findOne({ _id: userId }).select("cart");
       // new User({...}) + save = create
+      console.log("result:", result);
       const cartSize = result.cart.length;
       return cartSize || 0;
     } catch (error) {

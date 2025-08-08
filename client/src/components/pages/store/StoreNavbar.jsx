@@ -9,8 +9,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
+const StoreNavbar = ({ cartSize = 0, setMobileMenuOpen, mobileMenuOpen }) => {
   const router = useRouter();
+
+  console.log("cartSize:", cartSize);
 
   const NavItem = ({ icon, label, onClick }) => (
     <TooltipProvider>
@@ -19,13 +21,15 @@ const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
           <Button
             variant="ghost"
             className="flex flex-col items-center justify-center text-[#E3DAC9] hover:bg-[#2E8B57] transition-colors rounded-full h-12 w-12"
-            onClick={onClick}>
+            onClick={onClick}
+          >
             {icon}
           </Button>
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-[#2E8B57] text-[#E3DAC9] border-none">
+          className="bg-[#2E8B57] text-[#E3DAC9] border-none"
+        >
           {label}
         </TooltipContent>
       </Tooltip>
@@ -38,10 +42,12 @@ const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-50"
-          onClick={() => setMobileMenuOpen(false)}>
+          onClick={() => setMobileMenuOpen(false)}
+        >
           <div
             className="w-64 h-full bg-[#355E3B] text-[#E3DAC9] p-4 ml-auto"
-            onClick={(e) => e.stopPropagation()}>
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Menu</h2>
               <Button variant="ghost" onClick={() => setMobileMenuOpen(false)}>
@@ -53,26 +59,32 @@ const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]"
-                onClick={() => router.push("/")}>
+                onClick={() => router.push("/")}
+              >
                 <Home size={20} className="mr-2" /> Home
               </Button>
 
               <Button
                 variant="ghost"
-                className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]">
-                <ShoppingCart size={20} className="mr-2" /> Cart ({cart.length})
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]">
-                <CreditCard size={20} className="mr-2" /> Checkout
+                className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]"
+                onClick={() => router.push("/store/cart")}
+              >
+                <ShoppingCart size={20} className="mr-2" /> Cart ({cartSize})
               </Button>
 
               <Button
                 variant="ghost"
                 className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]"
-                onClick={() => router.push("/profile")}>
+                onClick={() => router.push("/store/orders")}
+              >
+                <CreditCard size={20} className="mr-2" /> Orders
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-[#E3DAC9] hover:bg-[#2E8B57]"
+                onClick={() => router.push("/profile")}
+              >
                 <User size={20} className="mr-2" /> Profile
               </Button>
             </div>
@@ -87,7 +99,8 @@ const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
         </h1>
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="p-2 rounded-full hover:bg-[#2E8B57] bg-[#355E3B] text-white">
+          className="p-2 rounded-full hover:bg-[#2E8B57] bg-[#355E3B] text-white"
+        >
           <Menu size={20} />
         </button>
       </div>
@@ -96,24 +109,23 @@ const StoreNavbar = ({ cart = [], setMobileMenuOpen, mobileMenuOpen }) => {
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#355E3B] rounded-full px-6 py-3 shadow-lg flex items-center space-x-4 z-20">
         <NavItem
           icon={<Home size={20} />}
-          label="All Products"
+          label="Home"
           onClick={() => router.push("/")}
         />
 
         <NavItem
           icon={<ShoppingCart size={20} />}
-          label={`Cart (${cart.length})`}
-          onClick={() => {}}
+          label={`Cart (${cartSize})`}
+          onClick={() => router.push("/store/cart")}
         />
         <NavItem
           icon={<CreditCard size={20} />}
-          label={`Checkout (${cart.length})`}
-          onClick={() => {}}
+          label={`Orders`}
+          onClick={() => router.push("/store/orders")}
         />
-
         <NavItem
           icon={<User size={20} />}
-          label="History"
+          label="Profile"
           onClick={() => router.push("/profile")}
         />
       </div>
