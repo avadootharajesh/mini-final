@@ -38,7 +38,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <PawPrint size={28} />
               <Link href="/" className="titlefont text-2xl font-bold">
-                FurEver
+                Paw Haven
               </Link>
             </div>
 

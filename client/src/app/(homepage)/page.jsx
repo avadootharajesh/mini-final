@@ -67,7 +67,7 @@ export default function HomePage() {
     {
       id: 1,
       name: "Rocky",
-      text: "From street dog to loving home - Rocky was rescued after an injury report on FurEver and now lives with a wonderful family.",
+      text: "From street dog to loving home - Rocky was rescued after an injury report on Paw Haven and now lives with a wonderful family.",
       image:
         "https://images.unsplash.com/photo-1591160690555-5debfba289f0?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDJ8fHxlbnwwfHx8fHw%3D",
     },
@@ -416,7 +416,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
               <h3 className="titlefont text-2xl font-bold mb-6 flex items-center gap-2">
-                <PawPrint size={24} /> FurEver
+                <PawPrint size={24} /> Paw Haven
               </h3>
               <p className="text-white/80 mb-6">
                 Dedicated to improving the lives of animals and creating a
@@ -587,7 +587,7 @@ export default function HomePage() {
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <p className="text-white/60 text-sm">
-              © {new Date().getFullYear()} FurEver. All rights reserved.
+              © {new Date().getFullYear()} Paw Haven. All rights reserved.
             </p>
             <div className="flex gap-8 text-sm">
               <Link
